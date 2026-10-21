@@ -1,0 +1,30 @@
+[general]
+name=Road Network Integration Toolkit
+qgisMinimumVersion=3.28
+qgisMaximumVersion=4.99
+supportsQt6=True
+description=Port the finalized legacy road-network coverage classification and three integration methodologies into QGIS, with GeoPackage FID-collision protection.
+version=0.6.0
+author=UN-Habitat Data and Analytics Unit (DAU)
+# TODO before uploading to plugins.qgis.org: the repository requires a real email,
+# plus homepage/tracker/repository URLs. They are not needed for "Install from ZIP".
+email=
+about=QGIS-native road-network integration engine with dominant-buffer coverage classification, three integration methodologies, QGIS background tasks (cancellable), live progress/process logging, and GeoPackage/Shapefile/File Geodatabase export. Compatible with QGIS 3.28 to 4.99 (Qt5 and Qt6).
+tags=roads,road network,openstreetmap,microsoft,integration,coverage,conflation,vector
+homepage=
+tracker=
+repository=
+category=Vector
+icon=icon.png
+experimental=True
+deprecated=False
+hasProcessingProvider=False
+changelog=0.6.0
+ - QGIS 3.28 to 4.x compatibility (Qt5 and Qt6): version-safe enums, field types and QAction import (core/compat.py); supportsQt6 declared
+ - Runs can now be cancelled (Cancel Run button or QGIS task manager)
+ - Fixed OSM/MS label detection being triggered by unrelated folder names in the input path
+ - Input attributes OBJECTID/ogc_fid/geom are preserved under safe names; stale Shape_Length/Shape_Area are no longer copied
+ - File Geodatabase output is validated before processing starts (previously failed after the run)
+ - Unknown provider feature counts no longer abort the run
+ - Faster Methodology 3 vertex-in-buffer test
+ - Installable ZIP now has a valid folder name and no stray files
