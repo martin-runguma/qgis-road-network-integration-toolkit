@@ -1,45 +1,62 @@
-# Road Network Integration Toolkit
+<p align="center">
+  <img src="docs/images/banner.svg" alt="Road Network Integration Toolkit: merge priority and secondary road networks inside QGIS" width="100%">
+</p>
 
-![Road Network Integration Toolkit: merge priority and secondary road networks inside QGIS](docs/images/banner.svg)
+<h1 align="center">Road Network Integration Toolkit</h1>
 
-![QGIS 3.28+](https://img.shields.io/badge/QGIS-3.28%2B-589632?logo=qgis&logoColor=white) ![Qt5 and Qt6](https://img.shields.io/badge/Qt-5%20%7C%206-41CD52?logo=qt&logoColor=white) ![Output: GeoPackage, Shapefile, File Geodatabase](https://img.shields.io/badge/output-GPKG%20%7C%20SHP%20%7C%20GDB-1E88E5) ![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-e9a23b)
+<p align="center">Compare networks, identify missing roads, and choose how to integrate them inside QGIS.</p>
 
-**Road Network Integration Toolkit** is a QGIS plugin that combines a *priority* road network with a *secondary* one. It measures how much of each secondary road the priority network already covers, classifies what is missing, and merges the missing roads in, snapping them to the priority network when you ask it to. Everything runs inside QGIS, so you do not need GeoPandas, Shapely or a separate Python environment.
+<p align="center">
+  <img src="https://img.shields.io/badge/QGIS-3.28%2B-589632?logo=qgis&logoColor=white" alt="QGIS 3.28+">
+  <img src="https://img.shields.io/badge/Qt-5%20%7C%206-41CD52?logo=qt&logoColor=white" alt="Qt5 and Qt6">
+  <img src="https://img.shields.io/badge/output-GPKG%20%7C%20SHP%20%7C%20GDB-1E88E5" alt="Output: GeoPackage, Shapefile, File Geodatabase">
+  <img src="https://img.shields.io/badge/license-GPL--3.0-e9a23b" alt="License: GPL-3.0">
+</p>
 
-It is a PyQGIS port of a finished Spyder/GeoPandas workflow, with the same class rules and the same three methodologies.
+<p align="center">
+  <a href="#quick-start"><b>Get started</b></a> &nbsp;·&nbsp;
+  <a href="#choose-a-method">Choose a method</a> &nbsp;·&nbsp;
+  <a href="#installation">Install</a> &nbsp;·&nbsp;
+  <a href="#output">Output</a> &nbsp;·&nbsp;
+  <a href="#troubleshooting">Troubleshoot</a>
+</p>
 
-## Contents
+> **In short:** choose a trusted priority network, add useful roads from a secondary network, and decide whether those roads should be snapped into place.
 
-- [Features](#features)
+**Road Network Integration Toolkit** is a QGIS plugin for comparing and combining two road networks. It measures coverage, classifies the missing parts of the secondary network, and adds selected roads to the priority network. It runs inside QGIS and needs no separate GeoPandas or Shapely installation.
+
+### At a glance
+
+| Topic | Summary |
+|---|---|
+| **Three methods** | Direct Merge, Clip + Snap, and Targeted Snap |
+| **Export formats** | GeoPackage, Shapefile, or File Geodatabase |
+| **Compatibility** | QGIS 3.28+ (Qt5) and QGIS 4.x (Qt6) |
+| **Setup** | No extra Python packages |
+
+<details>
+<summary><b>Contents</b></summary>
+
+- [What the plugin does](#features)
 - [How it works](#how-it-works)
+- [Choose a method](#choose-a-method)
 - [Installation](#installation)
 - [Quick start](#quick-start)
-- [Screenshots](#screenshots)
-- [Coverage classification](#coverage-classification)
-- [Methodologies](#methodologies)
-- [Output](#output)
-- [Under the hood](#under-the-hood)
-- [Tips for good results](#tips-for-good-results)
-- [Troubleshooting](#troubleshooting)
-- [Compatibility](#compatibility)
-- [Release notes](#release-notes)
-- [Development](#development)
-- [Author](#author)
-- [License](#license)
+- [Coverage classes](#coverage-classification)
+- [Method details](#methodologies)
+- [Output files](#output)
+- [Tips and troubleshooting](#tips-for-good-results)
+- [Compatibility and development](#compatibility)
+
+</details>
 
 ## Features
 
-- **Three methodologies:** Direct Merge, Clip + Snap and Targeted Snap, all built on one shared processing engine
-- **Dominant-buffer coverage classification** that keeps the legacy `Missing_Class` rules exactly, including the `0.25` boundary
-- **Guided dialog:** pick the priority roads, secondary roads and study area, choose a methodology and a projected CRS, and run
-- **CRS suggestion:** one click picks the UTM zone that contains the centre of your study area
-- **Editable distances:** buffer, snapping and densification distances have sensible metre defaults and unlock under *Advanced settings*
-- **Three export formats:** GeoPackage, Shapefile or File Geodatabase, each checked by reopening it in QGIS
-- **Optional diagnostics:** keep buffers, classified roads, snap layers and method outputs
-- **Responsive interface:** processing runs as a cancellable QGIS background task with a progress bar and a live log
-- **Run log on disk:** a timestamped `<output-name>_processing.log` is saved beside your output
-- **GeoPackage-safe IDs:** input `fid` values are preserved as `source_fid`, so exports never collide on the reserved key
-- Works on **QGIS 3.28 to 4.99** (Qt5 and Qt6)
+- **Compare and classify:** coverage is measured with the legacy `Missing_Class` rules, including its exact `0.25` boundary.
+- **Choose how to combine:** use one of three methods, from a direct merge to locally targeted snapping.
+- **Work with confidence:** the guided dialog suggests a projected CRS, exposes editable distances, and runs as a cancellable background task.
+- **Inspect the result:** export to GeoPackage, Shapefile, or File Geodatabase; optionally keep diagnostic layers and a timestamped run log.
+- **Preserve source IDs:** input `fid` values are kept as `source_fid` when needed for GeoPackage compatibility.
 
 ## How it works
 
@@ -113,7 +130,11 @@ Click **Validate Inputs** to check your choices, then **Run Integration**. Watch
 
 ## Screenshots
 
-*Screenshots coming soon.*
+<p align="center">
+  <img src="docs/images/dialog.svg" alt="The Road Network Integration Toolkit dialog as it first opens: empty inputs, Targeted Snap selected, advanced distances at their defaults and an empty log" width="620">
+</p>
+
+<p align="center"><sub>The dialog as it first opens: inputs empty, Targeted Snap preselected, advanced distances at their defaults, and an empty log. Rendered from the plugin’s own layout and colours.</sub></p>
 
 ## Coverage classification
 
@@ -137,30 +158,57 @@ The **remaining ratio** is the uncovered length divided by the original length. 
 
 > **Note:** a road at exactly `0.25` belongs to no class, so it is never merged. This matches the finalized legacy script on purpose, so results line up with the original workflow.
 
+## Choose a method
+
+| If you need… | Choose | What to expect |
+|---|---|---|
+| The quickest result with original secondary geometries | **Direct Merge** | No trimming or snapping; crossing roads stay visible and gaps may remain. |
+| Roads trimmed to uncovered areas and joined to nearby priority roads | **Clip + Snap** | Snaps both ends of each remaining secondary line to nearby anchors. |
+| Joins focused around local overlap areas | **Targeted Snap** | Builds local targets and tries nearby points before fallback targets. |
 ## Methodologies
 
-![The three methodologies compared](docs/images/methodologies.svg)
+![Animated schematic comparing Direct Merge, Clip + Snap, and Targeted Snap](docs/images/methodologies-walkthrough.gif)
+
+*Schematic overview; this is not a QGIS screen recording.*
+
+[View the static comparison diagram](docs/images/methodologies.svg).
 
 ### 1. Direct Merge
 
-Keeps every priority feature and adds the secondary roads classified `missing_1` to `missing_4`. It does not trim or snap them, so gaps can remain between the two networks. It writes the legacy three-field schema: `coverage_ratio`, `Missing_Class` and `source`. It is the fastest option and the closest match to the legacy direct merge.
+**Best for:** a quick merge that stays close to the legacy workflow.
+
+- Keeps every priority feature and adds secondary roads in `missing_1` through `missing_4`.
+- Keeps full secondary-road geometry, including roads that cross or intersect the priority network.
+- Does not trim or snap roads, so gaps can remain and crossings are left as they were in the input.
+- Writes the legacy fields: `coverage_ratio`, `Missing_Class`, and `source`.
 
 ### 2. Clip + Snap
 
-Removes the part of each missing class that lies inside the dissolved priority buffer, then places snap anchors along the priority roads at your densification interval. Both ends of each remaining secondary line are snapped to the nearest anchor within the maximum snapping distance. Cumulative merges are built class by class (base + class 1, then classes 1 to 2, 1 to 3 and 1 to 4) and saved to an intermediate GeoPackage.
+**Best for:** trimming secondary roads to uncovered areas and joining their ends to nearby priority roads.
+
+1. Removes the part of each missing road inside the dissolved priority buffer.
+2. Places snap anchors along priority roads at the selected densification interval.
+3. Snaps both ends of each remaining secondary line to the nearest anchor within the maximum snapping distance.
+4. Builds cumulative class merges and saves them to an intermediate GeoPackage.
 
 ### 3. Targeted Snap
 
-Trims the missing classes against the dissolved priority buffer, then buffers the overlapping portions with square end caps. Priority roads are clipped to those local buffers, and start, end and normalised midpoint targets are extracted. Each secondary segment snaps to a nearby local midpoint first, then to local endpoints, and finally to a global priority-road target if both local steps fail. `missing_1` roads are added back without snapping, and secondary roads are merged before the priority network.
+**Best for:** keeping joins local to places where secondary roads overlap the priority network.
 
-The plugin restores the intended local buffer association. The legacy script never joined `buffer_id` back to the trimmed roads, which silently skipped the local snapping stage.
+1. Trims missing roads against the dissolved priority buffer and buffers their overlapping portions with square end caps.
+2. Clips priority roads to those local buffers to define target intersection sections.
+3. Creates points along the target sections at the selected densification interval.
+4. Snaps each secondary road to its nearest target point within the maximum snapping distance. If no local point is close enough, it tries local endpoints and then a global priority-road target.
+5. Adds `missing_1` roads without snapping and merges secondary roads before the priority network.
 
-|                            | Direct Merge                                         | Clip + Snap                                               | Targeted Snap                                          |
-|----------------------------|------------------------------------------------------|-----------------------------------------------------------|--------------------------------------------------------|
-| Changes secondary geometry | No                                                   | Yes                                                       | Yes                                                    |
-| Snapping                   | None                                                 | To anchors on the priority road                           | Local targets first, global fallback                   |
-| Best when                  | You want the fastest merge or will fix gaps yourself | You want gap-free joins along the whole priority network | You want joins that stay local to where roads overlap  |
+The plugin restores the intended local buffer association. The legacy script did not join `buffer_id` back to trimmed roads, which skipped the local snapping stage.
 
+| Compare | Direct Merge | Clip + Snap | Targeted Snap |
+|---|---|---|---|
+| Trims secondary roads | No | Yes | Yes |
+| Snaps roads | No | Both ends to nearby anchors | Nearest local target point, then fallback targets |
+| Keeps crossing roads unchanged | Yes | No guarantee | No guarantee |
+| Best fit | Fast, geometry-preserving merge | Broad network-wide joins | Localized joins near overlap sections |
 ## Output
 
 ![The final network, run log and optional intermediate files in your output folder](docs/images/output.svg)
@@ -218,6 +266,9 @@ File Geodatabase output needs a GDAL build that can create `.gdb` (OpenFileGDB w
 
 ## Troubleshooting
 
+<details markdown="1">
+<summary><b>Common problems and fixes</b></summary>
+
 | Problem                                               | What to do                                                                                                                                                         |
 |-------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **Some secondary roads never appear in the result**   | Roads at exactly `0.25` remaining ratio, and classes `missing_a` and `missing_b`, are not merged by design. See [Coverage classification](#coverage-classification). |
@@ -233,6 +284,8 @@ If your problem is not listed, please [open an issue](https://github.com/martin-
 - The methodology, output format and approximate size of the study area
 - The full text of the processing log
 
+</details>
+
 ## Compatibility
 
 | QGIS version                    | Qt          | Status    |
@@ -245,6 +298,9 @@ Python 3.9 or later is required. All version-specific API access (enums, `QgsFie
 > **Validation note:** before operational use, run the plugin in your target QGIS version on a small sample and compare it with the original Spyder scripts. QGIS/GEOS and Shapely can differ on edge-case geometry even when the workflow is equivalent.
 
 ## Release notes
+
+<details markdown="1">
+<summary><b>Version history (0.4.1 to 0.6.0)</b></summary>
 
 **0.6.0**
 - QGIS 3.28 to 4.x compatibility (Qt5 and Qt6), with `supportsQt6` declared
@@ -266,7 +322,12 @@ Python 3.9 or later is required. All version-specific API access (enums, `QgsFie
 **0.4.1**
 - Input `fid` attributes are preserved as `source_fid`, which prevents GeoPackage duplicate-key failures in Methodologies 2 and 3
 
+</details>
+
 ## Development
+
+<details markdown="1">
+<summary><b>Project layout and contributing</b></summary>
 
 ```
 road_network_integration_toolkit/
@@ -296,6 +357,8 @@ road_network_integration_toolkit/
 To work on the plugin, clone this repository and link or copy it into your QGIS plugins directory as a folder named `road_network_integration_toolkit` (see [Installation](#installation)). Restart QGIS to be sure new code is running.
 
 Contributions, bug reports and ideas are welcome. Please open an [issue](https://github.com/martin-runguma/qgis-road-network-integration-toolkit/issues) or a pull request.
+
+</details>
 
 ## Author
 
