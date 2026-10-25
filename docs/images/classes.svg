@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 270" role="img" aria-label="Remaining ratio from 0 to 1 split into classes missing_a, missing_b, missing_4, missing_3, missing_2 and missing_1. Exactly 0.25 is unclassified.">
+<rect width="900" height="270" rx="16" fill="#eef3f1"/>
+<g font-family="Segoe UI,Helvetica,Arial,sans-serif" fill="#12303f"><text x="40" y="38" font-size="18" font-weight="700">Remaining (uncovered) ratio and its class</text></g>
+<g stroke="#fff" stroke-width="2">
+<rect x="40" y="90" width="8" height="46" fill="#12303f"/>
+<rect x="48" y="90" width="205" height="46" fill="#7fc4bb"/>
+<rect x="253" y="90" width="207" height="46" fill="#f4d08a"/>
+<rect x="460" y="90" width="207" height="46" fill="#eeb04e"/>
+<rect x="667" y="90" width="193" height="46" fill="#e08a1e"/></g>
+<rect x="248" y="82" width="10" height="62" fill="#d6336c"/><circle cx="860" cy="113" r="12" fill="#d6336c" stroke="#fff" stroke-width="2"/>
+<g font-family="Segoe UI,Helvetica,Arial,sans-serif" fill="#12303f" font-size="15" text-anchor="middle">
+<text x="150" y="119" font-weight="700">missing_b</text><text x="356" y="119" font-weight="700">missing_4</text><text x="563" y="119" font-weight="700">missing_3</text><text x="763" y="119" font-weight="700">missing_2</text>
+<text x="44" y="164" fill="#4f6670">0</text><text x="253" y="164" fill="#d6336c" font-weight="700">0.25</text><text x="460" y="164" fill="#4f6670">0.50</text><text x="667" y="164" fill="#4f6670">0.75</text><text x="860" y="164" fill="#4f6670">1.00</text>
+<text x="40" y="80" text-anchor="start" font-size="14" font-weight="700">missing_a (0 to 0.01)</text>
+<text x="880" y="76" text-anchor="end" font-weight="700">missing_1 (exactly 1.00)</text></g>
+<g font-family="Segoe UI,Helvetica,Arial,sans-serif" fill="#4f6670" font-size="14"><text x="40" y="200">missing_a: effectively fully covered.  missing_b: more than 75% covered.  missing_1: completely uncovered.</text>
+<text x="40" y="224" fill="#d6336c" font-weight="700">Exactly 0.25 is left unclassified, as in the legacy script, so it is never merged.</text></g>
+</svg>

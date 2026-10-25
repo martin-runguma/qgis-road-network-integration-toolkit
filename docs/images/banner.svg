@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 260" role="img" aria-label="Road Network Integration Toolkit: merge priority and secondary road networks inside QGIS">
+<defs><clipPath id="c"><rect width="900" height="260" rx="16"/></clipPath><pattern id="g" width="30" height="30" patternUnits="userSpaceOnUse"><path d="M30 0H0V30" fill="none" stroke="#2a9d8f" stroke-opacity=".14"/></pattern></defs>
+<rect width="900" height="260" rx="16" fill="#eef3f1"/><rect width="900" height="260" rx="16" fill="url(#g)"/>
+<g font-family="Segoe UI,Helvetica,Arial,sans-serif" fill="#12303f"><text x="44" y="98" font-size="42" font-weight="800">Road Network</text><text x="44" y="146" font-size="42" font-weight="800">Integration Toolkit</text>
+<text x="44" y="186" font-size="18" fill="#4f6670">Merge priority and secondary road networks inside QGIS</text>
+<text x="44" y="220" font-size="15" fill="#2a7f74" font-weight="600">QGIS 3.28 to 4.99  |  Qt5 and Qt6  |  PyQGIS only</text></g>
+<g clip-path="url(#c)"><path d="M470 215C580 200 660 130 880 92" stroke="#2a9d8f" stroke-opacity=".22" stroke-width="76" fill="none"/>
+<path d="M470 215C580 200 660 130 880 92" stroke="#12303f" stroke-width="9" stroke-linecap="round" fill="none"/>
+<g stroke="#e9a23b" stroke-width="5" stroke-linecap="round" fill="none"><path d="M520 250L545 198M610 40L640 160M720 250L730 128M810 30L826 100M490 90L555 130"/></g>
+<g fill="#d6336c" stroke="#eef3f1" stroke-width="3"><circle cx="545" cy="198" r="8"/><circle cx="640" cy="160" r="8"/><circle cx="730" cy="128" r="8"/><circle cx="826" cy="100" r="8"/></g>
+</g></svg>

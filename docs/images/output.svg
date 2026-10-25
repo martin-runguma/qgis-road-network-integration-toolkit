@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 250" role="img" aria-label="Output: the chosen final network, an optional Intermediate_Files folder and a processing log are written to the output folder">
+<rect width="900" height="250" rx="16" fill="#eef3f1"/>
+<g font-family="Segoe UI,Helvetica,Arial,sans-serif" fill="#12303f" font-size="16">
+<rect x="30" y="30" width="250" height="190" rx="12" fill="#fff" stroke="#cfdcd8"/><text x="50" y="62" font-size="18" font-weight="700">Choose a format</text>
+<g font-size="15"><rect x="50" y="82" width="210" height="30" rx="8" fill="#2a9d8f" fill-opacity=".2"/><text x="64" y="102">GeoPackage (.gpkg)</text>
+<rect x="50" y="122" width="210" height="30" rx="8" fill="#e9a23b" fill-opacity=".25"/><text x="64" y="142">Shapefile (.shp)</text>
+<rect x="50" y="162" width="210" height="30" rx="8" fill="#12303f" fill-opacity=".12"/><text x="64" y="182">File Geodatabase (.gdb)</text></g>
+<path d="M290 125H340" stroke="#12303f" stroke-width="3"/><path d="M340 125l-10-7v14z" fill="#12303f"/>
+<rect x="350" y="30" width="520" height="190" rx="12" fill="#fff" stroke="#cfdcd8"/><text x="372" y="62" font-size="18" font-weight="700">Your output folder</text>
+<g font-family="Consolas,Menlo,monospace" font-size="15"><text x="372" y="96">KE_Nairobi_...  (final network)</text><text x="372" y="126" fill="#4f6670">KE_Nairobi_..._processing.log</text><text x="372" y="156" fill="#4f6670">Intermediate_Files/</text><text x="396" y="182" fill="#4f6670" font-size="14">buffers, classified roads, snap layers, method outputs</text></g>
+</g></svg>

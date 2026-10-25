@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" role="img" aria-label="Three methodologies: Direct Merge leaves gaps, Clip + Snap joins endpoints to anchors, Targeted Snap joins to local start, middle and end targets">
+<rect width="900" height="300" rx="16" fill="#eef3f1"/>
+<g stroke="#cfdcd8" fill="#fff"><rect x="16" y="16" width="280" height="268" rx="12"/><rect x="310" y="16" width="280" height="268" rx="12"/><rect x="604" y="16" width="280" height="268" rx="12"/></g>
+<g font-family="Segoe UI,Helvetica,Arial,sans-serif" fill="#12303f" font-size="17" font-weight="700" text-anchor="middle"><text x="156" y="46">1. Direct Merge</text><text x="450" y="46">2. Clip + Snap</text><text x="744" y="46">3. Targeted Snap</text></g>
+<g font-family="Segoe UI,Helvetica,Arial,sans-serif" fill="#4f6670" font-size="14" text-anchor="middle"><text x="156" y="270">No trimming, no snapping</text><text x="450" y="270">Snap to anchors on the road</text><text x="744" y="270">Snap to local targets first</text></g>
+<g fill="none" stroke="#12303f" stroke-width="7" stroke-linecap="round"><path d="M34 170C100 160 180 130 278 118"/><path d="M328 170C394 160 474 130 572 118"/><path d="M622 170C688 160 768 130 866 118"/></g>
+<g stroke="#e9a23b" stroke-width="5" stroke-linecap="round"><path d="M95 245L112 190M205 235L215 150M80 70L120 120"/><path d="M389 245L412 160M499 235L508 128M374 70L414 135"/><path d="M683 245L720 158M793 235L744 147M668 70L708 128"/></g>
+<g fill="none" stroke="#7a8d94" stroke-dasharray="3 4"><circle cx="112" cy="175" r="11"/><circle cx="215" cy="142" r="11"/></g>
+<g fill="#fff" stroke="#12303f" stroke-width="2"><circle cx="360" cy="164" r="4"/><circle cx="412" cy="157" r="4"/><circle cx="460" cy="145" r="4"/><circle cx="508" cy="131" r="4"/><circle cx="540" cy="124" r="4"/></g>
+<rect x="680" y="118" width="130" height="62" fill="#2a9d8f" fill-opacity=".18" stroke="#2a9d8f" stroke-dasharray="4 4"/>
+<g fill="#fff" stroke="#12303f" stroke-width="3"><circle cx="684" cy="157" r="5"/><circle cx="744" cy="147" r="5"/><circle cx="806" cy="132" r="5"/></g>
+<g fill="#d6336c" stroke="#fff" stroke-width="2"><circle cx="412" cy="157" r="7"/><circle cx="508" cy="131" r="7"/><circle cx="720" cy="158" r="0"/><circle cx="744" cy="147" r="7"/></g>
+</svg>

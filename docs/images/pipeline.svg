@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 250" role="img" aria-label="Under the hood: the dialog schedules a background QgsTask that prepares, classifies, integrates and writes; the GUI thread then loads the output and reports">
+<defs><marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="#12303f"/></marker></defs>
+<rect width="900" height="250" rx="16" fill="#eef3f1"/>
+<rect x="24" y="24" width="200" height="202" rx="12" fill="#fff" stroke="#cfdcd8"/><rect x="250" y="24" width="400" height="202" rx="12" fill="#2a9d8f" fill-opacity=".1" stroke="#2a9d8f" stroke-dasharray="5 4"/><rect x="676" y="24" width="200" height="202" rx="12" fill="#fff" stroke="#cfdcd8"/>
+<g font-family="Segoe UI,Helvetica,Arial,sans-serif" fill="#12303f" text-anchor="middle"><text x="124" y="54" font-size="16" font-weight="700">GUI thread</text><text x="450" y="54" font-size="16" font-weight="700">Background QgsTask (cancellable)</text><text x="776" y="54" font-size="16" font-weight="700">GUI thread</text>
+<g font-size="14" fill="#4f6670"><text x="124" y="100">Validate inputs</text><text x="124" y="124">Copy transform context</text><text x="124" y="148">Schedule the task</text><text x="124" y="190">Progress bar and log</text>
+<text x="776" y="100">Load final layer</text><text x="776" y="124">(if requested)</text><text x="776" y="160">Show log path in</text><text x="776" y="184">the result message</text></g>
+<g font-size="15"><rect x="272" y="76" width="168" height="36" rx="8" fill="#fff" stroke="#2a9d8f"/><text x="356" y="99">Prepare inputs</text><rect x="460" y="76" width="168" height="36" rx="8" fill="#fff" stroke="#2a9d8f"/><text x="544" y="99">Classify coverage</text>
+<rect x="272" y="132" width="168" height="36" rx="8" fill="#fff" stroke="#2a9d8f"/><text x="356" y="155">Integrate (M1, M2, M3)</text><rect x="460" y="132" width="168" height="36" rx="8" fill="#fff" stroke="#2a9d8f"/><text x="544" y="155">Write and reopen check</text></g>
+<text x="450" y="206" font-size="13" fill="#4f6670">Progress messages stream back to the dialog</text></g>
+<g stroke="#12303f" stroke-width="2.5" marker-end="url(#a)"><path d="M226 125H246"/><path d="M652 125H672"/></g>
+</svg>

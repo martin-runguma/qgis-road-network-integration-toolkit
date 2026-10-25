@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 260" role="img" aria-label="Dominant single buffer rule: a secondary road crosses two priority buffers and only its largest single overlap is used">
+<rect width="900" height="260" rx="16" fill="#eef3f1"/>
+<path d="M40 80H500" stroke="#2a9d8f" stroke-opacity=".22" stroke-width="72"/><path d="M300 190H760" stroke="#2a9d8f" stroke-opacity=".22" stroke-width="72"/>
+<path d="M40 80H500M300 190H760" stroke="#12303f" stroke-width="7"/>
+<path d="M150 20L500 245" stroke="#e9a23b" stroke-width="6" stroke-linecap="round"/>
+<path d="M205 55L330 135" stroke="#d6336c" stroke-width="11" stroke-opacity=".8"/><path d="M395 160L440 189" stroke="#d6336c" stroke-width="11" stroke-opacity=".45"/>
+<g font-family="Segoe UI,Helvetica,Arial,sans-serif" fill="#12303f" font-size="15"><text x="46" y="136" font-weight="700">Buffer A</text><text x="306" y="238" font-weight="700">Buffer B</text>
+<text x="525" y="236" fill="#b87414" font-weight="700">Secondary road</text></g>
+<g font-family="Segoe UI,Helvetica,Arial,sans-serif" fill="#12303f"><text x="570" y="60" font-size="18" font-weight="700">Dominant single buffer</text>
+<text x="570" y="88" font-size="15" fill="#4f6670">Longest overlap with one buffer (A) is used.</text>
+<text x="570" y="110" font-size="15" fill="#4f6670">Overlaps are not added across buffers.</text></g>
+</svg>
