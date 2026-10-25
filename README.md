@@ -113,7 +113,7 @@ Tick **Advanced settings** to edit the distances. Unticking restores the default
 | Priority road buffer distance        | 20      | Buffers that define what is already covered      |
 | Secondary road buffer distance       | 10      | Buffers around overlap portions in Targeted Snap |
 | Maximum snapping distance            | 25      | How far an endpoint may move to join a road      |
-| Midpoint densification interval      | 10      | Spacing of snap anchors and midpoint targets     |
+| Midpoint densification interval      | 10      | Spacing of priority-road anchors in Clip + Snap  |
 | Maximum centroid adjustment distance | 15      | Centroid-to-vertex adjustment in Targeted Snap   |
 
 ### 4. Choose the output
@@ -197,11 +197,11 @@ The **remaining ratio** is the uncovered length divided by the original length. 
 
 1. Trims missing roads against the dissolved priority buffer and buffers their overlapping portions with square end caps.
 2. Clips priority roads to those local buffers to define target intersection sections.
-3. Creates points along the target sections at the selected densification interval.
-4. Snaps each secondary road to its nearest target point within the maximum snapping distance. If no local point is close enough, it tries local endpoints and then a global priority-road target.
+3. Creates three local targets on each clipped priority segment: its start, end, and midpoint.
+4. Tries the nearest local midpoint to the secondary segment centroid first and moves the closer secondary endpoint to it if within the maximum snapping distance. If that does not snap the segment, it tries local start/end targets; if neither local rule snaps it, it tries the nearest global targets within the same distance.
 5. Adds `missing_1` roads without snapping and merges secondary roads before the priority network.
 
-The plugin restores the intended local buffer association. The legacy script did not join `buffer_id` back to trimmed roads, which skipped the local snapping stage.
+**Implementation difference:** the plugin associates each trimmed secondary road with its local square buffer before snapping. The legacy script creates a point-to-buffer join but does not attach the generated `buffer_id` to the trimmed roads. Unless the input already contains a usable `buffer_id`, its local snapping rules are skipped and it falls back to the global targets. The QGIS plugin therefore follows the intended local-first workflow more closely, and the two implementations can produce different results.
 
 | Compare | Direct Merge | Clip + Snap | Targeted Snap |
 |---|---|---|---|
