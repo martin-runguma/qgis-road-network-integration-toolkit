@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 360" role="img" aria-labelledby="title desc">
+  <title id="title">Methodology 1: Direct Merge</title>
+  <desc id="desc">The priority network and eligible secondary roads in missing classes 1 through 4 are combined. Secondary road geometry is preserved without clipping or snapping.</desc>
+  <defs>
+    <style>
+      text { font-family: "Segoe UI", Arial, sans-serif; fill: #0B2545; }
+      .card { fill: #ffffff; stroke: #D7E2E8; stroke-width: 2; }
+      .base { fill: none; stroke: #0B5E8E; stroke-width: 8; stroke-linecap: round; stroke-linejoin: round; }
+      .sec { fill: none; stroke: #12B8A6; stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; }
+      .muted { fill: #526575; font-size: 14px; }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="#1499D6"/></marker>
+  </defs>
+  <rect width="1080" height="360" rx="18" fill="#F4F7F9"/>
+  <text x="32" y="42" font-size="22" font-weight="700">Methodology 1 · Direct Merge</text>
+  <rect class="card" x="30" y="67" width="300" height="240" rx="14"/>
+  <rect class="card" x="390" y="67" width="300" height="240" rx="14"/>
+  <rect class="card" x="750" y="67" width="300" height="240" rx="14"/>
+  <text x="180" y="99" text-anchor="middle" font-size="16" font-weight="700">Eligible inputs</text>
+  <text x="540" y="99" text-anchor="middle" font-size="16" font-weight="700">Append features</text>
+  <text x="900" y="99" text-anchor="middle" font-size="16" font-weight="700">Merged line layer</text>
+  <path d="M336 188H380M696 188H740" stroke="#1499D6" stroke-width="3" marker-end="url(#arrow)"/>
+  <g class="base"><path d="M65 178L130 161L195 174L267 143L300 152"/></g>
+  <g class="sec"><path d="M78 255L133 224L190 211L248 202L298 182"/></g>
+  <g class="base"><path d="M425 178L490 161L555 174L627 143L660 152"/></g>
+  <g class="sec"><path d="M438 255L493 224L550 211L608 202L658 182"/></g>
+  <g class="base"><path d="M785 178L850 161L915 174L987 143L1020 152"/></g>
+  <g class="sec"><path d="M798 255L853 224L910 211L968 202L1018 182"/></g>
+  <text x="180" y="281" text-anchor="middle" class="muted">Priority roads + eligible `missing_1`–`missing_4`</text>
+  <text x="540" y="281" text-anchor="middle" class="muted">Feature append only</text>
+  <text x="900" y="281" text-anchor="middle" class="muted">Original retained geometry</text>
+  <rect x="344" y="321" width="15" height="6" rx="3" fill="#0B5E8E"/><text x="366" y="328" class="muted">Priority network</text>
+  <rect x="510" y="321" width="15" height="6" rx="3" fill="#12B8A6"/><text x="532" y="328" class="muted">Secondary network</text>
+  <text x="1048" y="328" text-anchor="end" class="muted">No trimming · no snapping</text>
+</svg>

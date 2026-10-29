@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 530" role="img" aria-labelledby="title desc">
+  <title id="title">Road network integration workflows</title>
+  <desc id="desc">Secondary roads are screened against priority-road buffers. Roads with more than 75 percent coverage are suppressed from merged outputs. Eligible roads then follow one of three workflows: direct merge, buffer trimming and anchor snapping, or buffer trimming and local targeted snapping.</desc>
+  <defs>
+    <style>
+      text { font-family: "Segoe UI", Arial, sans-serif; fill: #173746; }
+      .small { font-size: 14px; fill: #526873; }
+      .label { font-size: 16px; font-weight: 700; }
+      .card { fill: #ffffff; stroke: #cbd9dc; stroke-width: 1.5; }
+      .road { fill: none; stroke: #173746; stroke-width: 7; stroke-linecap: round; }
+      .secondary { fill: none; stroke: #e49a35; stroke-width: 5; stroke-linecap: round; }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#78909a"/>
+    </marker>
+  </defs>
+  <rect width="1120" height="530" rx="18" fill="#eef4f2"/>
+  <text x="32" y="42" font-size="22" font-weight="700">Shared screening: threshold-based spatial suppression</text>
+  <rect x="32" y="62" width="1056" height="94" rx="12" fill="#ffffff" stroke="#cbd9dc"/>
+  <path class="road" d="M62 123 C140 117 188 91 262 87"/>
+  <path d="M62 123 C140 117 188 91 262 87" fill="none" stroke="#3a9d91" stroke-width="32" stroke-opacity=".18" stroke-linecap="round"/>
+  <path class="secondary" d="M93 148 C145 142 193 122 241 119"/>
+  <text x="290" y="96" class="label">Measure overlap with each individual priority-road buffer</text>
+  <text x="290" y="122" class="small">Use the largest single-buffer overlap; suppress features above 75% coverage.</text>
+  <path d="M760 113 H816" fill="none" stroke="#78909a" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="835" y="78" width="225" height="60" rx="9" fill="#fff2f3" stroke="#d7838c"/>
+  <text x="947" y="103" text-anchor="middle" class="label" fill="#9f3944">&gt;75% covered</text>
+  <text x="947" y="124" text-anchor="middle" class="small">excluded from merged outputs</text>
+
+  <text x="32" y="201" font-size="20" font-weight="700">Integration strategy for eligible roads</text>
+  <g>
+    <rect class="card" x="32" y="222" width="336" height="274" rx="14"/>
+    <rect class="card" x="392" y="222" width="336" height="274" rx="14"/>
+    <rect class="card" x="752" y="222" width="336" height="274" rx="14"/>
+  </g>
+  <g text-anchor="middle">
+    <text x="200" y="255" class="label">1 · Direct Merge</text>
+    <text x="560" y="255" class="label">2 · Clip + Snap</text>
+    <text x="920" y="255" class="label">3 · Targeted Snap</text>
+  </g>
+  <path class="road" d="M65 345 C140 340 222 304 335 299"/>
+  <path class="secondary" d="M94 422 C157 409 221 382 315 365"/>
+  <text x="200" y="466" text-anchor="middle" class="small">Retain eligible geometry as-is</text>
+
+  <path class="road" d="M425 345 C500 340 582 304 695 299"/>
+  <path class="secondary" d="M455 422 C501 412 523 402 540 393"/>
+  <path class="secondary" d="M590 379 C625 370 658 362 676 358"/>
+  <g fill="#fff" stroke="#173746" stroke-width="2">
+    <circle cx="445" cy="344" r="5"/><circle cx="493" cy="332" r="5"/><circle cx="541" cy="319" r="5"/><circle cx="590" cy="313" r="5"/><circle cx="642" cy="306" r="5"/><circle cx="688" cy="300" r="5"/>
+  </g>
+  <text x="560" y="466" text-anchor="middle" class="small">Subtract buffer mask; snap endpoints to anchors</text>
+
+  <path class="road" d="M785 345 C860 340 942 304 1055 299"/>
+  <path class="secondary" d="M814 422 C859 412 883 402 902 394"/>
+  <path class="secondary" d="M964 380 C997 371 1026 363 1036 358"/>
+  <rect x="865" y="304" width="126" height="90" rx="10" fill="#3a9d91" fill-opacity=".12" stroke="#3a9d91" stroke-dasharray="5 4"/>
+  <g fill="#ffffff" stroke="#173746" stroke-width="2"><circle cx="871" cy="337" r="5"/><circle cx="928" cy="325" r="5"/><circle cx="987" cy="310" r="5"/></g>
+  <circle cx="928" cy="325" r="7" fill="#d65369" stroke="#ffffff" stroke-width="2"/>
+  <text x="920" y="466" text-anchor="middle" class="small">Subtract mask; prefer local overlap-derived targets</text>
+</svg>

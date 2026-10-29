@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1140 430" role="img" aria-labelledby="title desc">
+  <title id="title">Compare the three integration methodologies</title>
+  <desc id="desc">Direct Merge preserves retained secondary roads. Clip and Snap removes portions inside the dissolved priority buffer and snaps endpoints to spaced anchors. Targeted Snap removes covered portions and prefers local overlap-derived midpoint or endpoint targets, then uses global targets.</desc>
+  <defs>
+    <style>
+      text { font-family: "Segoe UI", Arial, sans-serif; fill: #0B2545; }
+      .card { fill: #ffffff; stroke: #D7E2E8; stroke-width: 2; }
+      .base { fill: none; stroke: #0B5E8E; stroke-width: 8; stroke-linecap: round; }
+      .sec { fill: none; stroke: #12B8A6; stroke-width: 7; stroke-linecap: round; }
+      .muted { fill: #526575; font-size: 13px; }
+    </style>
+  </defs>
+  <rect width="1140" height="430" rx="20" fill="#F4F7F9"/>
+  <text x="34" y="44" font-size="22" font-weight="700">Choose the geometry operation that fits your workflow</text>
+  <g>
+    <rect class="card" x="30" y="72" width="345" height="325" rx="16"/>
+    <rect class="card" x="397" y="72" width="345" height="325" rx="16"/>
+    <rect class="card" x="764" y="72" width="345" height="325" rx="16"/>
+  </g>
+  <g text-anchor="middle">
+    <text x="202" y="108" font-size="17" font-weight="700">1 · Direct Merge</text>
+    <text x="569" y="108" font-size="17" font-weight="700">2 · Clip + Snap</text>
+    <text x="936" y="108" font-size="17" font-weight="700">3 · Targeted Snap</text>
+  </g>
+  <path class="base" d="M66 205L133 190L203 201L276 172L340 179"/>
+  <path class="sec" d="M76 287L141 252L207 235L278 224L337 207"/>
+  <text x="202" y="342" text-anchor="middle" class="muted">Retain eligible line geometry</text>
+  <text x="202" y="363" text-anchor="middle" class="muted">No trimming · no snapping</text>
+
+  <path class="base" d="M433 205L500 190L570 201L643 172L708 179"/>
+  <path class="sec" d="M446 286L492 260L515 251"/>
+  <path class="sec" d="M626 226L670 215L704 207"/>
+  <g fill="#ffffff" stroke="#0B2545" stroke-width="2">
+    <circle cx="433" cy="205" r="5"/><circle cx="487" cy="193" r="5"/><circle cx="543" cy="197" r="5"/><circle cx="599" cy="189" r="5"/><circle cx="653" cy="168" r="5"/><circle cx="708" cy="179" r="5"/>
+  </g>
+  <circle cx="515" cy="251" r="7" fill="#1499D6" stroke="#ffffff" stroke-width="2"/>
+  <circle cx="626" cy="226" r="7" fill="#1499D6" stroke="#ffffff" stroke-width="2"/>
+  <text x="569" y="342" text-anchor="middle" class="muted">Subtract dissolved buffer mask</text>
+  <text x="569" y="363" text-anchor="middle" class="muted">Snap endpoints to spaced anchors</text>
+
+  <path class="base" d="M800 205L867 190L937 201L1010 172L1075 179"/>
+  <path class="sec" d="M813 286L859 260L881 251"/>
+  <path class="sec" d="M993 226L1037 215L1071 207"/>
+  <rect x="847" y="166" width="145" height="102" rx="12" fill="#1499D6" fill-opacity=".08" stroke="#1499D6" stroke-dasharray="6 5"/>
+  <g fill="#ffffff" stroke="#0B2545" stroke-width="2"><circle cx="854" cy="194" r="5"/><circle cx="918" cy="192" r="5"/><circle cx="982" cy="183" r="5"/></g>
+  <circle cx="918" cy="192" r="8" fill="#1499D6" stroke="#ffffff" stroke-width="2"/>
+  <text x="936" y="342" text-anchor="middle" class="muted">Subtract mask · build local targets</text>
+  <text x="936" y="363" text-anchor="middle" class="muted">Local midpoint/endpoints, then global fallback</text>
+</svg>

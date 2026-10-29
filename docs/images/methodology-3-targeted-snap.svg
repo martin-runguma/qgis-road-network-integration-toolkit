@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1140 430" role="img" aria-labelledby="title desc">
+  <title id="title">Methodology 3: Targeted Snap</title>
+  <desc id="desc">The method subtracts the dissolved priority-buffer mask, square-buffers the overlap portions of secondary roads, clips priority roads to those local buffers, and derives local endpoints and midpoints as snap targets. It tries local midpoint targets near a secondary segment centroid, then local endpoints, then global targets. Missing class 1 roads are added without snapping.</desc>
+  <defs>
+    <style>
+      text { font-family: "Segoe UI", Arial, sans-serif; fill: #0B2545; }
+      .card { fill: #ffffff; stroke: #D7E2E8; stroke-width: 2; }
+      .base { fill: none; stroke: #0B5E8E; stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; }
+      .sec { fill: none; stroke: #12B8A6; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+      .muted { fill: #526575; font-size: 13px; }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="#1499D6"/></marker>
+  </defs>
+  <rect width="1140" height="430" rx="18" fill="#F4F7F9"/>
+  <text x="32" y="42" font-size="22" font-weight="700">Methodology 3 · Targeted Snap</text>
+  <g>
+    <rect class="card" x="28" y="68" width="340" height="286" rx="14"/>
+    <rect class="card" x="400" y="68" width="340" height="286" rx="14"/>
+    <rect class="card" x="772" y="68" width="340" height="286" rx="14"/>
+  </g>
+  <g text-anchor="middle" font-size="15" font-weight="700">
+    <text x="198" y="99">1 · Trim and derive local buffer</text>
+    <text x="570" y="99">2 · Build local snap targets</text>
+    <text x="942" y="99">3 · Snap local-first, then fallback</text>
+  </g>
+  <path d="M374 204H392M746 204H764" stroke="#1499D6" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <!-- Stage 1: trim against the dissolved mask, then buffer the overlap piece. -->
+  <path d="M57 204C116 167 174 234 236 196S315 183 340 206" fill="none" stroke="#1499D6" stroke-width="48" stroke-opacity=".12" stroke-linecap="round"/>
+  <path class="base" d="M57 204C116 167 174 234 236 196S315 183 340 206"/>
+  <path class="sec" d="M56 286L108 260L157 236"/>
+  <path d="M157 236L205 208L253 193" fill="none" stroke="#D84A64" stroke-width="7" stroke-linecap="round"/>
+  <path class="sec" d="M253 193L304 163L342 146"/>
+  <rect x="132" y="164" width="146" height="110" rx="4" fill="#12B8A6" fill-opacity=".10" stroke="#12B8A6" stroke-width="2" stroke-dasharray="7 5"/>
+  <path class="sec" d="M56 286L108 260L157 236"/>
+  <path d="M278 164L278 273" stroke="#12B8A6" stroke-width="1" stroke-dasharray="4 5"/>
+  <text x="198" y="309" text-anchor="middle" class="muted">Overlap piece seeds a local square buffer</text>
+  <text x="198" y="329" text-anchor="middle" class="muted">Covered secondary portions are removed</text>
+
+  <!-- Stage 2: priority road is clipped to local square; endpoints and midpoint become targets. -->
+  <rect x="464" y="138" width="212" height="154" rx="4" fill="#12B8A6" fill-opacity=".08" stroke="#12B8A6" stroke-width="2" stroke-dasharray="7 5"/>
+  <path class="base" d="M427 220L481 205L535 214L590 190L655 199L713 177" opacity=".28"/>
+  <path class="base" d="M464 210L481 205L535 214L590 190L600 193"/>
+  <g fill="#ffffff" stroke="#0B5E8E" stroke-width="3">
+    <circle cx="464" cy="210" r="7"/><circle cx="600" cy="193" r="7"/>
+  </g>
+  <circle cx="532" cy="209" r="8" fill="#1499D6" stroke="#ffffff" stroke-width="2"/>
+  <path class="sec" d="M433 286L481 257L514 239"/>
+  <circle cx="514" cy="239" r="6" fill="#ffffff" stroke="#D84A64" stroke-width="3"/>
+  <text x="570" y="309" text-anchor="middle" class="muted">Clip priority roads; mark local start,</text>
+  <text x="570" y="329" text-anchor="middle" class="muted">end, and length-midpoint targets</text>
+
+  <!-- Stage 3: centroid-selected local midpoint is tried before local endpoints/global fallback. -->
+  <rect x="840" y="139" width="192" height="148" rx="4" fill="#12B8A6" fill-opacity=".08" stroke="#12B8A6" stroke-width="2" stroke-dasharray="7 5"/>
+  <path class="base" d="M800 218L846 202L893 211L941 187L995 196L1080 169" opacity=".28"/>
+  <path class="base" d="M840 204L846 202L893 211L941 187L952 190"/>
+  <g fill="#ffffff" stroke="#0B5E8E" stroke-width="3"><circle cx="840" cy="204" r="6"/><circle cx="952" cy="190" r="6"/></g>
+  <circle cx="895" cy="210" r="8" fill="#1499D6" stroke="#ffffff" stroke-width="2"/>
+  <path class="sec" d="M809 286L852 259L879 240L895 210"/>
+  <circle cx="879" cy="240" r="5" fill="#D84A64"/>
+  <path d="M879 240L895 210" stroke="#D84A64" stroke-width="2" stroke-dasharray="4 4"/>
+  <text x="942" y="309" text-anchor="middle" class="muted">Nearest local midpoint to segment centroid,</text>
+  <text x="942" y="329" text-anchor="middle" class="muted">then local endpoints, then global fallback</text>
+
+  <text x="570" y="386" text-anchor="middle" class="muted">Snap distance is bounded by Maximum snapping distance · missing_1 roads are added without snapping · schematic</text>
+</svg>

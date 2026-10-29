@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 470" role="img" aria-labelledby="title desc">
+  <title id="title">Bring road networks together</title>
+  <desc id="desc">A conceptual illustration of priority roads in blue and secondary roads in teal being screened and integrated into one road network.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0B2545"/><stop offset="1" stop-color="#071A2D"/></linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#123C61"/><stop offset="1" stop-color="#0A2B4A"/></linearGradient>
+    <style>
+      text { font-family: "Segoe UI", Arial, sans-serif; }
+      .minor { fill: #C7D9E4; }
+      .blue-road { fill: none; stroke: #1499D6; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+      .teal-road { fill: none; stroke: #12B8A6; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+      .white-road { fill: none; stroke: #8EB7CC; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="9" refY="6" orient="auto"><path d="M0 0L12 6L0 12z" fill="#12B8A6"/></marker>
+  </defs>
+  <rect width="1200" height="470" rx="20" fill="url(#bg)"/>
+  <g fill="none" stroke="#2D5A78" opacity=".2">
+    <path d="M0 400C160 330 218 430 372 370S680 340 835 395 1040 430 1200 360"/>
+    <path d="M0 106C153 140 280 67 408 112S712 158 856 106 1050 72 1200 128"/>
+    <path d="M470 0V470M500 0V470M530 0V470M560 0V470M590 0V470M620 0V470M650 0V470M680 0V470M710 0V470"/>
+  </g>
+  <text x="54" y="128" fill="#ffffff" font-size="38" font-weight="700">Bring road networks</text>
+  <text x="54" y="174" fill="#12B8A6" font-size="38" font-weight="700">together.</text>
+  <text x="56" y="222" class="minor" font-size="16">A QGIS-native toolkit for road-network integration,</text>
+  <text x="56" y="247" class="minor" font-size="16">coverage classification, and repeatable geospatial work.</text>
+  <text x="56" y="290" fill="#A9C4D3" font-size="13">Screen candidate roads, then choose how eligible geometry joins.</text>
+  <g>
+    <rect x="504" y="42" width="292" height="165" rx="15" fill="url(#panel)" stroke="#28658C" stroke-width="1.5"/>
+    <rect x="824" y="42" width="326" height="165" rx="15" fill="url(#panel)" stroke="#177F7C" stroke-width="1.5"/>
+  </g>
+  <rect x="526" y="58" width="91" height="27" rx="13" fill="#123C61" stroke="#1499D6"/>
+  <circle cx="541" cy="71" r="5" fill="#1499D6"/><text x="553" y="76" fill="#ffffff" font-size="12">Priority</text>
+  <rect x="846" y="58" width="104" height="27" rx="13" fill="#103D47" stroke="#12B8A6"/>
+  <circle cx="861" cy="71" r="5" fill="#12B8A6"/><text x="873" y="76" fill="#ffffff" font-size="12">Secondary</text>
+  <g class="blue-road">
+    <path d="M527 154L580 132L636 144L700 102L774 123"/><path d="M548 190L595 167L636 144L671 91"/>
+    <path d="M560 96L595 167L692 177L774 123"/><path d="M625 190L637 144L751 75"/>
+  </g>
+  <g class="teal-road">
+    <path d="M846 177L888 157L934 132L986 148L1045 116L1127 132"/><path d="M880 93L934 132L950 189"/>
+    <path d="M960 92L986 148L1041 185L1124 169"/><path d="M1015 89L1045 116L1092 81"/>
+  </g>
+  <path d="M660 218C680 238 720 240 744 259" fill="none" stroke="#12B8A6" stroke-width="4" marker-end="url(#arrow)"/>
+  <path d="M990 218C970 239 921 242 892 259" fill="none" stroke="#12B8A6" stroke-width="4" marker-end="url(#arrow)"/>
+  <rect x="612" y="272" width="463" height="157" rx="17" fill="url(#panel)" stroke="#3A7997" stroke-width="1.5"/>
+  <text x="636" y="300" fill="#D7EAF2" font-size="14" font-weight="700">INTEGRATED NETWORK · CONCEPTUAL</text>
+  <g class="white-road">
+    <path d="M650 360L704 337L758 347L810 325L868 346L932 320L1037 340"/><path d="M667 403L710 375L758 347L788 304"/>
+    <path d="M704 337L730 306L810 325L839 397L932 386L1037 340"/><path d="M868 346L891 300L970 295L1002 380"/>
+  </g>
+  <g class="blue-road">
+    <path d="M650 360L704 337L758 347L810 325L868 346L932 320L1037 340"/><path d="M667 403L710 375L758 347L788 304"/>
+  </g>
+  <g class="teal-road">
+    <path d="M704 337L730 306L810 325L839 397L932 386L1037 340"/><path d="M868 346L891 300L970 295L1002 380"/>
+  </g>
+  <g fill="#071A2D" stroke="#E4F5F8" stroke-width="2"><circle cx="758" cy="347" r="5"/><circle cx="868" cy="346" r="5"/><circle cx="932" cy="320" r="5"/></g>
+  <text x="1090" y="417" fill="#95B6C8" font-size="11" text-anchor="end">Illustrative schematic · not a processing output</text>
+</svg>

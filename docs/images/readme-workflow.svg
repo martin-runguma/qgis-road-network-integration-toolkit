@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 430" role="img" aria-labelledby="title desc">
+  <title id="title">Road integration workflow</title>
+  <desc id="desc">Road and boundary inputs are validated and projected, secondary roads are screened by individual-buffer overlap, the selected integration method processes eligible roads, and the result is exported with a log and optional diagnostics.</desc>
+  <defs>
+    <style>
+      text { font-family: "Segoe UI", Arial, sans-serif; fill: #0B2545; }
+      .card { fill: #ffffff; stroke: #D7E2E8; stroke-width: 2; }
+      .head { font-size: 16px; font-weight: 700; }
+      .body { font-size: 13px; fill: #526575; }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0 0L10 5L0 10z" fill="#1499D6"/>
+    </marker>
+  </defs>
+  <rect width="1100" height="430" rx="20" fill="#F4F7F9"/>
+  <text x="38" y="48" font-size="22" font-weight="700">From source roads to a reviewable integrated layer</text>
+  <g>
+    <rect class="card" x="34" y="108" width="186" height="150" rx="14"/>
+    <rect class="card" x="248" y="108" width="186" height="150" rx="14"/>
+    <rect class="card" x="462" y="108" width="206" height="150" rx="14"/>
+    <rect class="card" x="696" y="108" width="186" height="150" rx="14"/>
+    <rect class="card" x="910" y="108" width="156" height="150" rx="14"/>
+  </g>
+  <g fill="none" stroke="#1499D6" stroke-width="3" marker-end="url(#arrow)">
+    <path d="M222 183H240"/><path d="M436 183H454"/><path d="M670 183H688"/><path d="M884 183H902"/>
+  </g>
+  <g text-anchor="middle">
+    <text x="127" y="148" class="head">1 · Inputs</text>
+    <text x="127" y="178" class="body">Priority roads</text>
+    <text x="127" y="198" class="body">Secondary roads</text>
+    <text x="127" y="218" class="body">Study boundary</text>
+    <text x="341" y="148" class="head">2 · Validate &amp; prepare</text>
+    <text x="341" y="178" class="body">Check geometry types</text>
+    <text x="341" y="198" class="body">Transform to analysis CRS</text>
+    <text x="341" y="218" class="body">Prepare processing extent</text>
+    <text x="565" y="148" class="head">3 · Screen coverage</text>
+    <text x="565" y="178" class="body">Build individual buffers</text>
+    <text x="565" y="198" class="body">Measure largest overlap</text>
+    <text x="565" y="218" class="body">Classify eligible roads</text>
+    <text x="789" y="148" class="head">4 · Integrate</text>
+    <text x="789" y="178" class="body">Direct Merge</text>
+    <text x="789" y="198" class="body">Clip + Snap</text>
+    <text x="789" y="218" class="body">Targeted Snap</text>
+    <text x="988" y="148" class="head">5 · Export</text>
+    <text x="988" y="178" class="body">Write line layer</text>
+    <text x="988" y="198" class="body">Reopen check</text>
+    <text x="988" y="218" class="body">Log + optional layers</text>
+  </g>
+  <path d="M565 277V316H341" fill="none" stroke="#0B5E8E" stroke-width="2" stroke-dasharray="6 5"/>
+  <rect x="250" y="316" width="642" height="74" rx="12" fill="#E7F7F5" stroke="#12B8A6" stroke-width="1.5"/>
+  <text x="571" y="346" text-anchor="middle" font-size="15" font-weight="700">Eligibility rule · threshold-based spatial suppression</text>
+  <text x="571" y="371" text-anchor="middle" class="body">More than 75% covered by one buffer is excluded; exactly 75% remains unclassified by the legacy rule.</text>
+</svg>
