@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Documentation | Road Network Integration Toolkit</title><meta name="description" content="Technical documentation, parameters, outputs and support resources for the QGIS plugin.">
+<link rel="stylesheet" href="assets/css/style.css"></head><body>
+
+<header class="site-header">
+  <div class="container nav-wrap">
+    <a class="brand" href="index.html">
+      <img src="icon.png" onerror="this.src='docs/images/readme-header.svg'" alt="">
+      <span>Road Network<br>Integration Toolkit</span>
+    </a>
+    <nav class="nav-links" aria-label="Main navigation">
+      <a href="index.html">Overview</a><a href="features.html">Features</a>
+      <a href="methodologies.html">Methodologies</a><a href="installation.html">Installation</a>
+      <a href="documentation.html">Documentation</a>
+    </nav>
+    <a class="nav-cta" href="https://plugins.qgis.org/plugins/road_network_integration_toolkit/">Get the plugin <span>↗</span></a>
+    <button class="menu-toggle" aria-label="Open navigation" aria-expanded="false">☰</button>
+  </div>
+</header>
+
+<main><section class="page-hero"><div class="container"><p class="eyebrow">Technical reference</p><h1>Documentation and project resources</h1>
+<p class="lead">Find the methodology guide, parameter reference, output details, technical notes and support channels.</p></div></section>
+<section class="section"><div class="container">
+<div class="grid-2">
+ <article class="card"><div class="card-icon">01</div><h3>Methodology guide</h3><p>Detailed explanation of the coverage screening logic, integration methods and geometry behavior.</p><a class="card-link" href="help/methodology_guide.md">Open methodology guide ↗</a></article>
+ <article class="card"><div class="card-icon">02</div><h3>Source code</h3><p>Browse the plugin implementation, tests, release metadata and development history.</p><a class="card-link" href="https://github.com/martin-runguma/qgis-road-network-integration-toolkit">View GitHub repository ↗</a></article>
+ <article class="card"><div class="card-icon">03</div><h3>QGIS Plugin Repository</h3><p>Find the published plugin package, listing information and available releases.</p><a class="card-link" href="https://plugins.qgis.org/plugins/road_network_integration_toolkit/">View plugin listing ↗</a></article>
+ <article class="card"><div class="card-icon">04</div><h3>Issue tracker</h3><p>Report a bug or propose an improvement. Include your QGIS version, method, output format and relevant processing log.</p><a class="card-link" href="https://github.com/martin-runguma/qgis-road-network-integration-toolkit/issues">Report an issue ↗</a></article>
+</div>
+</div></section>
+<section class="section soft"><div class="container"><div class="section-head"><p class="eyebrow">Processing parameters</p><h2>Default distance settings</h2><p>All distance values are entered in metres and converted to the analysis CRS map units.</p></div>
+<div class="table-wrap"><table><thead><tr><th>Setting</th><th>Default</th><th>Purpose</th></tr></thead><tbody>
+<tr><td>Priority road buffer distance</td><td>20 m</td><td>Coverage classification and priority-buffer mask.</td></tr>
+<tr><td>Secondary road buffer distance</td><td>10 m</td><td>Local square buffers in Targeted Snap.</td></tr>
+<tr><td>Maximum snapping distance</td><td>25 m</td><td>Endpoint snapping in Clip + Snap and Targeted Snap.</td></tr>
+<tr><td>Midpoint densification interval</td><td>10 m</td><td>Anchor spacing in Clip + Snap.</td></tr>
+<tr><td>Maximum centroid adjustment distance</td><td>15 m</td><td>Validated by the dialog but currently not used by the processing engine.</td></tr>
+</tbody></table></div>
+</div></section>
+<section class="section"><div class="container prose"><h2>Output formats</h2><ul>
+<li><strong>GeoPackage (.gpkg):</strong> recommended; full field names and multiple layers.</li>
+<li><strong>Shapefile (.shp):</strong> compatible, but field names are limited to 10 characters.</li>
+<li><strong>File Geodatabase (.gdb):</strong> depends on a create-capable GDAL driver in the active QGIS installation.</li>
+</ul><h2>Technical considerations</h2><ul>
+<li>Road inputs must be line layers and the study boundary must be polygon geometry.</li>
+<li>A projected analysis CRS is required for distance operations.</li>
+<li>Roads are prepared within the envelope of the study boundary expanded by 30 km; they are not clipped to the study polygon itself.</li>
+<li>Coverage is based on the largest overlap with one individual buffer, not the union of all overlaps.</li>
+<li>Cancellation is cooperative and occurs at safe processing checkpoints.</li>
+</ul></div></section></main>
+
+<footer class="site-footer">
+ <div class="container">
+  <div class="footer-grid">
+   <div><div class="footer-brand">Road Network Integration Toolkit</div>
+    <p>A QGIS plugin for screening and integrating complementary road network datasets.</p>
+    <p>Built for practical geospatial workflows.</p></div>
+   <div><h4>Explore</h4><div class="footer-links">
+    <a href="index.html">Overview</a><a href="features.html">Features</a><a href="methodologies.html">Methodologies</a>
+    <a href="installation.html">Installation</a><a href="documentation.html">Documentation</a></div></div>
+   <div><h4>Project</h4><div class="footer-links">
+    <a href="https://github.com/martin-runguma/qgis-road-network-integration-toolkit">GitHub repository</a>
+    <a href="https://plugins.qgis.org/plugins/road_network_integration_toolkit/">QGIS Plugin Repository</a>
+    <a href="https://github.com/martin-runguma/qgis-road-network-integration-toolkit/issues">Report an issue</a>
+    <a href="LICENSE">GNU GPL v3.0</a></div></div>
+  </div>
+  <div class="footer-bottom"><span>© 2026 Road Network Integration Toolkit</span><span>Open-source QGIS plugin · GPL-3.0</span></div>
+ </div>
+</footer>
+<script src="assets/js/site.js"></script>
+</body></html>

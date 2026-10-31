@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Installation | Road Network Integration Toolkit</title><meta name="description" content="Install the Road Network Integration Toolkit in QGIS and run your first integration.">
+<link rel="stylesheet" href="assets/css/style.css"></head><body>
+
+<header class="site-header">
+  <div class="container nav-wrap">
+    <a class="brand" href="index.html">
+      <img src="icon.png" onerror="this.src='docs/images/readme-header.svg'" alt="">
+      <span>Road Network<br>Integration Toolkit</span>
+    </a>
+    <nav class="nav-links" aria-label="Main navigation">
+      <a href="index.html">Overview</a><a href="features.html">Features</a>
+      <a href="methodologies.html">Methodologies</a><a href="installation.html">Installation</a>
+      <a href="documentation.html">Documentation</a>
+    </nav>
+    <a class="nav-cta" href="https://plugins.qgis.org/plugins/road_network_integration_toolkit/">Get the plugin <span>↗</span></a>
+    <button class="menu-toggle" aria-label="Open navigation" aria-expanded="false">☰</button>
+  </div>
+</header>
+
+<main><section class="page-hero"><div class="container"><p class="eyebrow">Get started</p><h1>Install the toolkit in QGIS</h1>
+<p class="lead">The simplest installation route is through the QGIS Plugin Manager. The plugin runs using the Python, PyQGIS, Qt and GDAL components supplied by QGIS.</p></div></section>
+<section class="section"><div class="container grid-2">
+<div class="prose"><h2>Install through Plugin Manager</h2><ol>
+<li>Open QGIS.</li><li>Go to <strong>Plugins → Manage and Install Plugins…</strong></li>
+<li>Search for <strong>Road Network Integration Toolkit</strong>.</li><li>Select the plugin and choose <strong>Install Plugin</strong>.</li>
+<li>Open it from the Plugins menu or its toolbar icon.</li></ol>
+<p><a class="button" href="https://plugins.qgis.org/plugins/road_network_integration_toolkit/">Open QGIS Plugin Repository ↗</a></p>
+<h2>Install from ZIP</h2><p>Download the package from the official QGIS plugin listing. In Plugin Manager, choose <strong>Install from ZIP</strong> and select the downloaded package.</p>
+<h2>Source installation</h2><p>Place the plugin files in a folder named <span class="code">road_network_integration_toolkit</span> under the active QGIS profile's <span class="code">python/plugins</span> directory. Restart QGIS and enable the plugin.</p></div>
+<div>
+<div class="card"><h3>System compatibility</h3><div class="badge-row"><span class="pill">QGIS 3.28–4.99</span><span class="pill">Qt 5 / Qt 6</span><span class="pill">Python via QGIS</span></div>
+<p>The plugin uses QGIS APIs and does not require separately installed GeoPandas or Shapely packages.</p></div>
+<div class="card" style="margin-top:18px"><h3>Recommended output format</h3><p><strong>GeoPackage (.gpkg)</strong> is recommended because it preserves full field names and supports multiple layers and intermediate diagnostics.</p></div>
+</div></div></section>
+<section class="section soft"><div class="container"><div class="section-head"><p class="eyebrow">First run</p><h2>Quick start checklist</h2><p>Prepare your inputs and follow these steps for an initial integration.</p></div>
+<div class="steps">
+<div class="step"><h3>Select inputs</h3><p>Priority roads, secondary roads and polygon study boundary.</p></div>
+<div class="step"><h3>Choose method</h3><p>Direct Merge, Clip + Snap or Targeted Snap.</p></div>
+<div class="step"><h3>Set CRS</h3><p>Choose an appropriate projected CRS for distance operations.</p></div>
+<div class="step"><h3>Review settings</h3><p>Start with defaults, then tune distances if required.</p></div>
+<div class="step"><h3>Validate and run</h3><p>Check inputs, run integration and inspect the log.</p></div>
+</div>
+<div class="inline-image"><img src="docs/images/dialog.svg" alt="Road Network Integration Toolkit plugin dialog"></div>
+</div></section></main>
+
+<footer class="site-footer">
+ <div class="container">
+  <div class="footer-grid">
+   <div><div class="footer-brand">Road Network Integration Toolkit</div>
+    <p>A QGIS plugin for screening and integrating complementary road network datasets.</p>
+    <p>Built for practical geospatial workflows.</p></div>
+   <div><h4>Explore</h4><div class="footer-links">
+    <a href="index.html">Overview</a><a href="features.html">Features</a><a href="methodologies.html">Methodologies</a>
+    <a href="installation.html">Installation</a><a href="documentation.html">Documentation</a></div></div>
+   <div><h4>Project</h4><div class="footer-links">
+    <a href="https://github.com/martin-runguma/qgis-road-network-integration-toolkit">GitHub repository</a>
+    <a href="https://plugins.qgis.org/plugins/road_network_integration_toolkit/">QGIS Plugin Repository</a>
+    <a href="https://github.com/martin-runguma/qgis-road-network-integration-toolkit/issues">Report an issue</a>
+    <a href="LICENSE">GNU GPL v3.0</a></div></div>
+  </div>
+  <div class="footer-bottom"><span>© 2026 Road Network Integration Toolkit</span><span>Open-source QGIS plugin · GPL-3.0</span></div>
+ </div>
+</footer>
+<script src="assets/js/site.js"></script>
+</body></html>

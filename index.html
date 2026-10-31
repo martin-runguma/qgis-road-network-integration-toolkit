@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Overview | Road Network Integration Toolkit</title><meta name="description" content="A QGIS plugin for classifying and integrating complementary road network datasets.">
+<link rel="stylesheet" href="assets/css/style.css"></head><body>
+
+<header class="site-header">
+  <div class="container nav-wrap">
+    <a class="brand" href="index.html">
+      <img src="icon.png" onerror="this.src='docs/images/readme-header.svg'" alt="">
+      <span>Road Network<br>Integration Toolkit</span>
+    </a>
+    <nav class="nav-links" aria-label="Main navigation">
+      <a href="index.html">Overview</a><a href="features.html">Features</a>
+      <a href="methodologies.html">Methodologies</a><a href="installation.html">Installation</a>
+      <a href="documentation.html">Documentation</a>
+    </nav>
+    <a class="nav-cta" href="https://plugins.qgis.org/plugins/road_network_integration_toolkit/">Get the plugin <span>↗</span></a>
+    <button class="menu-toggle" aria-label="Open navigation" aria-expanded="false">☰</button>
+  </div>
+</header>
+
+<main>
+<section class="hero"><div class="container hero-grid">
+ <div><p class="eyebrow">A QGIS plugin for road network integration</p>
+  <h1>Bring road networks together. With clarity and control.</h1>
+  <p class="lead">Combine a trusted priority road network with useful roads from a secondary dataset. Assess coverage, classify candidate roads, and choose how they are integrated.</p>
+  <div class="hero-actions"><a class="button" href="https://plugins.qgis.org/plugins/road_network_integration_toolkit/">Get the plugin <span>↗</span></a>
+   <a class="button secondary" href="methodologies.html">Explore methodologies</a></div>
+  <p class="hero-note">Designed for GIS analysts, transport planners, researchers and geospatial teams.</p>
+  <div class="badge-row"><span class="pill">QGIS 3.28–4.99</span><span class="pill">Qt 5 and Qt 6</span><span class="pill">GPL-3.0</span></div>
+ </div>
+ <div class="hero-visual"><img src="docs/images/road-network-integration-hero.svg" alt="Illustration of priority and secondary road networks being integrated"></div>
+</div></section>
+<section class="section"><div class="container">
+ <div class="section-head"><p class="eyebrow">What it does</p><h2>A structured workflow for combining road datasets</h2>
+ <p>Different road datasets rarely have identical coverage or geometry. The toolkit provides a repeatable way to identify potentially missing roads and integrate eligible features using a method suited to your analysis.</p></div>
+ <div class="grid-3">
+  <article class="card"><div class="card-icon">01</div><h3>Assess coverage</h3><p>Measure secondary-road overlap against individual priority-road buffers and classify candidate roads.</p><a class="card-link" href="features.html">Explore capabilities →</a></article>
+  <article class="card"><div class="card-icon">02</div><h3>Choose an approach</h3><p>Select Direct Merge, Clip + Snap, or Targeted Snap according to the desired geometry treatment.</p><a class="card-link" href="methodologies.html">Compare methods →</a></article>
+  <article class="card"><div class="card-icon">03</div><h3>Review the result</h3><p>Export an integrated multiline network and optionally retain diagnostic layers and a processing log.</p><a class="card-link" href="documentation.html">Read documentation →</a></article>
+ </div>
+</div></section>
+<section class="section soft"><div class="container">
+ <div class="section-head"><p class="eyebrow">How it works</p><h2>From source data to an integrated network</h2><p>The workflow keeps the priority network as the reference while screening and processing eligible secondary roads.</p></div>
+ <div class="inline-image"><img src="docs/images/readme-workflow.svg" alt="Toolkit processing workflow"></div>
+ <div class="steps">
+  <div class="step"><h3>Select inputs</h3><p>Priority roads, secondary roads and a study-area boundary.</p></div>
+  <div class="step"><h3>Prepare geometry</h3><p>Transform inputs to a suitable projected analysis CRS.</p></div>
+  <div class="step"><h3>Measure coverage</h3><p>Classify secondary roads using buffer overlap.</p></div>
+  <div class="step"><h3>Integrate</h3><p>Apply the selected merge and geometry method.</p></div>
+  <div class="step"><h3>Review outputs</h3><p>Export the result and inspect diagnostics where needed.</p></div>
+ </div>
+</div></section>
+<section class="section"><div class="container"><div class="cta-band"><div><h2>Choose the integration method that fits your data</h2><p>Understand how each method handles trimming, overlaps and endpoint snapping.</p></div><a class="button" href="methodologies.html">Compare methodologies →</a></div></div></section>
+</main>
+
+<footer class="site-footer">
+ <div class="container">
+  <div class="footer-grid">
+   <div><div class="footer-brand">Road Network Integration Toolkit</div>
+    <p>A QGIS plugin for screening and integrating complementary road network datasets.</p>
+    <p>Built for practical geospatial workflows.</p></div>
+   <div><h4>Explore</h4><div class="footer-links">
+    <a href="index.html">Overview</a><a href="features.html">Features</a><a href="methodologies.html">Methodologies</a>
+    <a href="installation.html">Installation</a><a href="documentation.html">Documentation</a></div></div>
+   <div><h4>Project</h4><div class="footer-links">
+    <a href="https://github.com/martin-runguma/qgis-road-network-integration-toolkit">GitHub repository</a>
+    <a href="https://plugins.qgis.org/plugins/road_network_integration_toolkit/">QGIS Plugin Repository</a>
+    <a href="https://github.com/martin-runguma/qgis-road-network-integration-toolkit/issues">Report an issue</a>
+    <a href="LICENSE">GNU GPL v3.0</a></div></div>
+  </div>
+  <div class="footer-bottom"><span>© 2026 Road Network Integration Toolkit</span><span>Open-source QGIS plugin · GPL-3.0</span></div>
+ </div>
+</footer>
+<script src="assets/js/site.js"></script>
+</body></html>

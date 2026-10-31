@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Features | Road Network Integration Toolkit</title><meta name="description" content="Explore coverage classification, integration methods, validation, diagnostics and export capabilities.">
+<link rel="stylesheet" href="assets/css/style.css"></head><body>
+
+<header class="site-header">
+  <div class="container nav-wrap">
+    <a class="brand" href="index.html">
+      <img src="icon.png" onerror="this.src='docs/images/readme-header.svg'" alt="">
+      <span>Road Network<br>Integration Toolkit</span>
+    </a>
+    <nav class="nav-links" aria-label="Main navigation">
+      <a href="index.html">Overview</a><a href="features.html">Features</a>
+      <a href="methodologies.html">Methodologies</a><a href="installation.html">Installation</a>
+      <a href="documentation.html">Documentation</a>
+    </nav>
+    <a class="nav-cta" href="https://plugins.qgis.org/plugins/road_network_integration_toolkit/">Get the plugin <span>↗</span></a>
+    <button class="menu-toggle" aria-label="Open navigation" aria-expanded="false">☰</button>
+  </div>
+</header>
+
+<main><section class="page-hero"><div class="container"><p class="eyebrow">Toolkit capabilities</p><h1>Tools for a more deliberate road network integration workflow</h1>
+<p class="lead">Screen candidate roads, control geometry processing, and keep intermediate outputs available for review.</p></div></section>
+<section class="section"><div class="container">
+ <div class="feature-list">
+  <div class="feature"><div class="card-icon">↔</div><div><h3>Coverage classification</h3><p>Measure the largest overlap with an individual priority-road buffer and assign the legacy Missing_Class categories.</p></div></div>
+  <div class="feature"><div class="card-icon">⌁</div><div><h3>Three integration methods</h3><p>Choose between Direct Merge, Clip + Snap, and Targeted Snap for different geometry outcomes.</p></div></div>
+  <div class="feature"><div class="card-icon">CRS</div><div><h3>Input validation and CRS handling</h3><p>Validate line and polygon inputs, require a projected analysis CRS, and convert metre-based settings to map units.</p></div></div>
+  <div class="feature"><div class="card-icon">◷</div><div><h3>Background processing</h3><p>Run geometry operations as a QGIS background task with progress reporting, logging and cancellation checkpoints.</p></div></div>
+  <div class="feature"><div class="card-icon">✓</div><div><h3>Reviewable diagnostics</h3><p>Optionally retain coverage layers, priority buffers, method-specific intermediate layers and a timestamped log.</p></div></div>
+  <div class="feature"><div class="card-icon">▤</div><div><h3>Multiple output formats</h3><p>Export to GeoPackage, Shapefile or File Geodatabase when the installed GDAL driver supports creation.</p></div></div>
+ </div>
+</div></section>
+<section class="section soft"><div class="container"><div class="section-head"><p class="eyebrow">Coverage logic</p><h2>Understand which secondary roads are eligible</h2>
+<p>Coverage classification is based on the largest overlap with one individual priority buffer. It does not sum overlap lengths across separate buffers.</p></div>
+<div class="inline-image"><img src="docs/images/coverage-classification.svg" alt="Coverage classification illustration"></div>
+<div class="table-wrap"><table><thead><tr><th>Remaining-length ratio</th><th>Class</th><th>Included in merged output</th></tr></thead><tbody>
+<tr><td>0 to 0.01 inclusive</td><td><span class="code">missing_a</span></td><td>No</td></tr>
+<tr><td>Greater than 0.01 and less than 0.25</td><td><span class="code">missing_b</span></td><td>No</td></tr>
+<tr><td>Exactly 0.25</td><td>Unclassified</td><td>No</td></tr>
+<tr><td>Greater than 0.25 through 0.50</td><td><span class="code">missing_4</span></td><td>Yes</td></tr>
+<tr><td>Greater than 0.50 through 0.75</td><td><span class="code">missing_3</span></td><td>Yes</td></tr>
+<tr><td>Greater than 0.75 and less than 1</td><td><span class="code">missing_2</span></td><td>Yes</td></tr>
+<tr><td>Exactly 1</td><td><span class="code">missing_1</span></td><td>Yes</td></tr>
+</tbody></table></div>
+<p style="color:var(--muted);font-size:13px;margin-top:14px">The exact 0.25 remaining-ratio boundary is unclassified for legacy compatibility. In Clip + Snap and Targeted Snap, trimming is a later operation against the dissolved priority-buffer mask.</p>
+</div></section></main>
+
+<footer class="site-footer">
+ <div class="container">
+  <div class="footer-grid">
+   <div><div class="footer-brand">Road Network Integration Toolkit</div>
+    <p>A QGIS plugin for screening and integrating complementary road network datasets.</p>
+    <p>Built for practical geospatial workflows.</p></div>
+   <div><h4>Explore</h4><div class="footer-links">
+    <a href="index.html">Overview</a><a href="features.html">Features</a><a href="methodologies.html">Methodologies</a>
+    <a href="installation.html">Installation</a><a href="documentation.html">Documentation</a></div></div>
+   <div><h4>Project</h4><div class="footer-links">
+    <a href="https://github.com/martin-runguma/qgis-road-network-integration-toolkit">GitHub repository</a>
+    <a href="https://plugins.qgis.org/plugins/road_network_integration_toolkit/">QGIS Plugin Repository</a>
+    <a href="https://github.com/martin-runguma/qgis-road-network-integration-toolkit/issues">Report an issue</a>
+    <a href="LICENSE">GNU GPL v3.0</a></div></div>
+  </div>
+  <div class="footer-bottom"><span>© 2026 Road Network Integration Toolkit</span><span>Open-source QGIS plugin · GPL-3.0</span></div>
+ </div>
+</footer>
+<script src="assets/js/site.js"></script>
+</body></html>

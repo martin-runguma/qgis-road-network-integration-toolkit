@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Methodologies | Road Network Integration Toolkit</title><meta name="description" content="Compare Direct Merge, Clip + Snap and Targeted Snap integration methods.">
+<link rel="stylesheet" href="assets/css/style.css"></head><body>
+
+<header class="site-header">
+  <div class="container nav-wrap">
+    <a class="brand" href="index.html">
+      <img src="icon.png" onerror="this.src='docs/images/readme-header.svg'" alt="">
+      <span>Road Network<br>Integration Toolkit</span>
+    </a>
+    <nav class="nav-links" aria-label="Main navigation">
+      <a href="index.html">Overview</a><a href="features.html">Features</a>
+      <a href="methodologies.html">Methodologies</a><a href="installation.html">Installation</a>
+      <a href="documentation.html">Documentation</a>
+    </nav>
+    <a class="nav-cta" href="https://plugins.qgis.org/plugins/road_network_integration_toolkit/">Get the plugin <span>↗</span></a>
+    <button class="menu-toggle" aria-label="Open navigation" aria-expanded="false">☰</button>
+  </div>
+</header>
+
+<main><section class="page-hero"><div class="container"><p class="eyebrow">Integration methods</p><h1>Three ways to combine complementary road networks</h1>
+<p class="lead">Each method preserves the priority network as the reference, but treats eligible secondary roads differently.</p></div></section>
+<section class="section"><div class="container">
+<div class="inline-image"><img src="docs/images/methodology-comparison.svg" alt="Comparison of the three integration methods"></div>
+<div class="grid-3">
+ <article class="card method-card"><img src="docs/images/methodology-1-direct-merge.svg" alt="Direct Merge method illustration"><div class="method-body"><span class="method-tag">Method 01</span><h3>Direct Merge</h3><p>Retains all priority roads and appends eligible secondary roads without trimming or snapping. Original secondary geometries are preserved.</p><p><strong>Best suited to:</strong> fast integration where retaining original geometry is important.</p></div></article>
+ <article class="card method-card"><img src="docs/images/methodology-2-clip-snap.svg" alt="Clip plus Snap method illustration"><div class="method-body"><span class="method-tag">Method 02</span><h3>Clip + Snap</h3><p>Subtracts the dissolved priority-buffer mask, creates regularly spaced anchors on priority roads, and snaps remaining line-part endpoints to nearby anchors.</p><p><strong>Best suited to:</strong> trimming covered portions and connecting nearby endpoints.</p></div></article>
+ <article class="card method-card"><img src="docs/images/methodology-3-targeted-snap.svg" alt="Targeted Snap method illustration"><div class="method-body"><span class="method-tag">Method 03</span><h3>Targeted Snap</h3><p>Uses overlap context to create local buffers and local snap targets, trying nearby midpoints and endpoints before global targets.</p><p><strong>Best suited to:</strong> locally guided connections around overlap areas.</p></div></article>
+</div>
+</div></section>
+<section class="section soft"><div class="container"><div class="section-head"><p class="eyebrow">At a glance</p><h2>Method comparison</h2><p>Consider how much geometry adjustment is appropriate for your source data and intended use.</p></div>
+<div class="table-wrap"><table><thead><tr><th>Method</th><th>Trims secondary roads</th><th>Snaps endpoints</th><th>Geometry treatment</th></tr></thead><tbody>
+<tr><td><strong>Direct Merge</strong></td><td>No</td><td>No</td><td>Appends eligible secondary features as-is.</td></tr>
+<tr><td><strong>Clip + Snap</strong></td><td>Yes</td><td>Yes</td><td>Subtracts the dissolved buffer mask, then snaps to spaced priority-road anchors.</td></tr>
+<tr><td><strong>Targeted Snap</strong></td><td>Yes</td><td>Yes</td><td>Uses local overlap-derived targets first, then global targets.</td></tr>
+</tbody></table></div>
+<div class="callout" style="margin-top:25px"><strong>Important implementation note</strong><p>The dialog's Maximum centroid adjustment distance setting is currently validated but is not consumed by the processing engine. Snap target checks use Maximum snapping distance.</p></div>
+</div></section>
+<section class="section"><div class="container"><div class="cta-band"><div><h2>Ready to run an integration?</h2><p>Install the plugin and follow the guided input and processing workflow.</p></div><a class="button" href="installation.html">Installation guide →</a></div></div></section>
+</main>
+
+<footer class="site-footer">
+ <div class="container">
+  <div class="footer-grid">
+   <div><div class="footer-brand">Road Network Integration Toolkit</div>
+    <p>A QGIS plugin for screening and integrating complementary road network datasets.</p>
+    <p>Built for practical geospatial workflows.</p></div>
+   <div><h4>Explore</h4><div class="footer-links">
+    <a href="index.html">Overview</a><a href="features.html">Features</a><a href="methodologies.html">Methodologies</a>
+    <a href="installation.html">Installation</a><a href="documentation.html">Documentation</a></div></div>
+   <div><h4>Project</h4><div class="footer-links">
+    <a href="https://github.com/martin-runguma/qgis-road-network-integration-toolkit">GitHub repository</a>
+    <a href="https://plugins.qgis.org/plugins/road_network_integration_toolkit/">QGIS Plugin Repository</a>
+    <a href="https://github.com/martin-runguma/qgis-road-network-integration-toolkit/issues">Report an issue</a>
+    <a href="LICENSE">GNU GPL v3.0</a></div></div>
+  </div>
+  <div class="footer-bottom"><span>© 2026 Road Network Integration Toolkit</span><span>Open-source QGIS plugin · GPL-3.0</span></div>
+ </div>
+</footer>
+<script src="assets/js/site.js"></script>
+</body></html>
