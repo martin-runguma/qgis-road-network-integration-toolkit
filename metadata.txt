@@ -1,30 +1,55 @@
 [general]
-name=Road Network Integration Toolkit
+name=Road Network Merging and Alignment Toolkit
 qgisMinimumVersion=3.28
 qgisMaximumVersion=4.99
-supportsQt6=True
-description=Port the finalized legacy road-network coverage classification and three integration methodologies into QGIS, with GeoPackage FID-collision protection.
-version=0.6.0
-author=UN-Habitat Data and Analytics Unit (DAU)
-# TODO before uploading to plugins.qgis.org: the repository requires a real email,
-# plus homepage/tracker/repository URLs. They are not needed for "Install from ZIP".
-email=
-about=QGIS-native road-network integration engine with dominant-buffer coverage classification, three integration methodologies, QGIS background tasks (cancellable), live progress/process logging, and GeoPackage/Shapefile/File Geodatabase export. Compatible with QGIS 3.28 to 4.99 (Qt5 and Qt6).
-tags=roads,road network,openstreetmap,microsoft,integration,coverage,conflation,vector
-homepage=
-tracker=
-repository=
+
+description=Integrate and align road network datasets in QGIS using three spatial integration methodologies and dominant-buffer coverage classification.
+
+about=Road Network Integration Toolkit is a QGIS plugin for integrating, aligning, and analysing road network datasets from different sources.
+    
+    The plugin provides three integration methodologies, dominant-buffer coverage classification, configurable spatial parameters, and a streamlined graphical interface for managing road network integration workflows.
+    
+    Key features:
+    - Three road network integration methodologies.
+    - Dominant-buffer coverage classification.
+    - Redesigned graphical interface.
+    - Multilingual interface and language selection.
+    - QGIS background processing with cancellation support.
+    - Live progress reporting and processing logs.
+    - Input validation and coordinate reference system suggestions.
+    - Configurable spatial buffers and integration tolerances.
+    - GeoPackage, Shapefile, and File Geodatabase export.
+    - GeoPackage feature ID collision protection.
+    - Automatic addition of output layers to the current QGIS project.
+    
+    Compatible with QGIS 3.28 to 4.x, supporting Qt5 and Qt6 environments.
+
+version=2.0.0
+author=Martin Runguma
+email=martin.runguma@gmail.com
+
+homepage=https://github.com/martin-runguma/qgis-road-network-integration-toolkit
+tracker=https://github.com/martin-runguma/qgis-road-network-integration-toolkit/issues
+repository=https://github.com/martin-runguma/qgis-road-network-integration-toolkit
+
 category=Vector
+tags=roads,road network,openstreetmap,microsoft,network integration,conflation,coverage classification,spatial analysis,vector
+
 icon=icon.png
-experimental=True
+
+experimental=false
 deprecated=False
 hasProcessingProvider=False
-changelog=0.6.0
- - QGIS 3.28 to 4.x compatibility (Qt5 and Qt6): version-safe enums, field types and QAction import (core/compat.py); supportsQt6 declared
- - Runs can now be cancelled (Cancel Run button or QGIS task manager)
- - Fixed OSM/MS label detection being triggered by unrelated folder names in the input path
- - Input attributes OBJECTID/ogc_fid/geom are preserved under safe names; stale Shape_Length/Shape_Area are no longer copied
- - File Geodatabase output is validated before processing starts (previously failed after the run)
- - Unknown provider feature counts no longer abort the run
- - Faster Methodology 3 vertex-in-buffer test
- - Installable ZIP now has a valid folder name and no stray files
+
+changelog=2.0.0
+    - Redesigned the graphical user interface.
+    - Introduced multilingual interface support with language selection.
+    - Improved QGIS 3.28 to 4.x compatibility, including Qt5 and Qt6.
+    - Added cancellable background processing through the interface and QGIS Task Manager.
+    - Improved OSM/MS source label detection.
+    - Preserved input attributes such as OBJECTID, ogc_fid, and geom under safe field names.
+    - Prevented copying of stale Shape_Length and Shape_Area attributes.
+    - Added File Geodatabase output validation before processing.
+    - Improved handling of unknown provider feature counts.
+    - Optimized the Methodology 3 vertex-in-buffer test.
+    - Improved ZIP packaging and installation structure.

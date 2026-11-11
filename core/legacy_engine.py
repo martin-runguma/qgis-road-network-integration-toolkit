@@ -95,6 +95,32 @@ STALE_GEOMETRY_FIELDS = {"shape_length", "shape_area", "shape"}
 # do not install a context retain the original QgsProject fallback behaviour.
 _WORKER_STATE = threading.local()
 
+# Errors QGIS/GEOS geometry calls raise on degenerate or invalid input. Anything
+# else (for example a KeyError) is a programming error and is deliberately not caught.
+_GEOMETRY_ERRORS = (RuntimeError, ValueError, TypeError, AttributeError, IndexError, ArithmeticError)
+
+
+_REMOVE_FAILED = (
+    "an existing output file could not be deleted before writing "
+    "(it may be open in QGIS or another program)"
+)
+
+
+def _note_event(key):
+    """Count a skipped/fallback event so the run log can report it afterwards."""
+    counts = getattr(_WORKER_STATE, "events", None)
+    if counts is None:
+        counts = _WORKER_STATE.events = {}
+    counts[key] = counts.get(key, 0) + 1
+
+
+def _log_events(log):
+    """Write one warning line per kind of skipped/fallback event, if any occurred."""
+    counts = getattr(_WORKER_STATE, "events", None) or {}
+    for key in sorted(counts):
+        total = counts[key]
+        _log(log, "Note: {} ({} time{}).".format(key, total, "" if total == 1 else "s"), "warning")
+
 
 @contextmanager
 def worker_transform_context(context):
@@ -105,10 +131,8 @@ def worker_transform_context(context):
         yield
     finally:
         if previous is None:
-            try:
+            if hasattr(_WORKER_STATE, "transform_context"):
                 del _WORKER_STATE.transform_context
-            except AttributeError:
-                pass
         else:
             _WORKER_STATE.transform_context = previous
 
@@ -232,11 +256,12 @@ def _make_valid(geometry):
     try:
         if not result.isGeosValid():
             result = result.makeValid()
-    except Exception:
+    except _GEOMETRY_ERRORS:
+        _note_event("geometry validity check failed; repair retried")
         try:
             result = result.makeValid()
-        except Exception:
-            pass
+        except _GEOMETRY_ERRORS:
+            _note_event("geometry could not be repaired; used as-is")
     return result
 
 
@@ -249,8 +274,8 @@ def _line_parts(geometry):
         if QgsWkbTypes.geometryType(g.wkbType()) == LINE_GEOMETRY:
             raw = g.asMultiPolyline() if g.isMultipart() else [g.asPolyline()]
             return [[QgsPointXY(p) for p in line] for line in raw if line and len(line) >= 2]
-    except Exception:
-        pass
+    except _GEOMETRY_ERRORS:
+        _note_event("line extraction failed; geometry-collection path used")
     # Difference/intersection operations can return a geometry collection.
     try:
         pieces = g.asGeometryCollection()
@@ -285,8 +310,8 @@ def _line_length(geometry):
     for part in parts:
         try:
             total += QgsGeometry.fromPolylineXY(part).length()
-        except Exception:
-            continue
+        except _GEOMETRY_ERRORS:
+            _note_event("a line part could not be measured and was ignored")
     return total
 
 
@@ -381,14 +406,14 @@ def _remove_output(path, kind):
                 try:
                     os.remove(candidate)
                 except OSError:
-                    pass
+                    _note_event(_REMOVE_FAILED)
         return
     for candidate in (path, path + "-wal", path + "-shm", path + "-journal"):
         if os.path.exists(candidate):
             try:
                 os.remove(candidate)
             except OSError:
-                pass
+                _note_event(_REMOVE_FAILED)
 
 
 def _write_final(layer, configuration, log=None):
@@ -410,8 +435,8 @@ def _write_final(layer, configuration, log=None):
                     QgsProject.instance().removeMapLayer(project_layer.id())
                     _log(log, "Released previously loaded output layer '{}' before overwriting.".format(
                         project_layer.name()))
-            except Exception:
-                continue
+            except (RuntimeError, ValueError, OSError):
+                _log(log, "A loaded project layer could not be checked for output overwrite.", "warning")
     else:
         _log(log, "Output layer handles were checked on the GUI thread before background processing.")
     if kind == "gpkg":
@@ -597,6 +622,45 @@ def _prepare_area(study_area, target_crs, log=None):
 # Buffer generation and legacy coverage classification
 # ---------------------------------------------------------------------------
 
+def _cap_join_candidates(cap_name):
+    """(end-cap, join) pairs accepted by ``QgsGeometry.buffer`` on this QGIS.
+
+    ``cap_name`` is ``"Flat"`` or ``"Square"``. The enums live in different
+    places depending on the release:
+
+    * QGIS 3.22+ and 4.x: ``Qgis.EndCapStyle.<Flat|Square>`` with
+      ``Qgis.JoinStyle.Round``.
+    * Older QGIS: ``QgsGeometry.EndCapStyle.Cap<Flat|Square>`` with
+      ``QgsGeometry.JoinStyle.JoinRound`` (note the ``Cap``/``Join`` prefixes).
+
+    Each location is probed without raising; unavailable ones are skipped.
+    """
+    candidates = []
+    for owner, cap_member, join_member in (
+        (Qgis, cap_name, "Round"),
+        (QgsGeometry, "Cap" + cap_name, "JoinRound"),
+    ):
+        cap = getattr(getattr(owner, "EndCapStyle", None), cap_member, None)
+        join = getattr(getattr(owner, "JoinStyle", None), join_member, None)
+        if cap is not None and join is not None:
+            candidates.append((cap, join))
+    return candidates
+
+
+def _buffer_with_caps(geometry, distance, segments, cap_name):
+    """Buffer with the requested end-cap style, reporting any fallback to round caps."""
+    last_error = None
+    for cap, join in _cap_join_candidates(cap_name):
+        try:
+            return geometry.buffer(float(distance), int(segments), cap, join, 2.0)
+        except TypeError as exc:
+            last_error = exc  # wrong enum type for this QGIS; try the next spelling
+    # Round caps change buffer shape (and so coverage results): never do this silently.
+    reason = type(last_error).__name__ if last_error is not None else "no supported cap-style enum found"
+    _note_event("{} end-cap buffering unavailable ({}); default round-cap buffer used".format(cap_name.lower(), reason))
+    return geometry.buffer(float(distance), int(segments))
+
+
 def _flat_buffer(geometry, distance, segments=8):
     """Buffer a line with flat ends, matching Shapely ``cap_style=2``.
 
@@ -604,25 +668,7 @@ def _flat_buffer(geometry, distance, segments=8):
     explicit cap/join enums for this overload, so support both current and
     older enum locations before falling back to the provider default.
     """
-    attempts = []
-    try:
-        attempts.append((Qgis.EndCapStyle.Flat, Qgis.JoinStyle.Round))
-    except Exception:
-        pass
-    try:
-        attempts.append((QgsGeometry.EndCapStyle.Flat, QgsGeometry.JoinStyle.Round))
-    except Exception:
-        pass
-    try:
-        attempts.append((QgsGeometry.CapFlat, QgsGeometry.JoinStyle.Round))
-    except Exception:
-        pass
-    for cap, join in attempts:
-        try:
-            return geometry.buffer(float(distance), int(segments), cap, join, 2.0)
-        except Exception:
-            continue
-    return geometry.buffer(float(distance), int(segments))
+    return _buffer_with_caps(geometry, distance, segments, "Flat")
 
 
 def _create_priority_buffers(priority_roads, distance, log=None):
@@ -639,7 +685,8 @@ def _create_priority_buffers(priority_roads, distance, log=None):
             continue
         try:
             buffer = _flat_buffer(g, _metres_to_map_units(crs, float(distance)), segments=8)
-        except Exception:
+        except _GEOMETRY_ERRORS:
+            _note_event("a priority road could not be buffered and was skipped")
             continue
         if buffer.isNull() or buffer.isEmpty():
             continue
@@ -710,8 +757,8 @@ def _coverage_values(road_geometry, buffers_by_id, buffer_index, length_to_m=1.0
         try:
             if buffer.intersects(road_geometry):
                 hits.append((buffer_id, buffer))
-        except Exception:
-            continue
+        except _GEOMETRY_ERRORS:
+            _note_event("a buffer/road intersection test failed; that buffer was ignored")
     if not hits:
         return original_length * length_to_m, original_length * length_to_m, 1.0, None, "missing_1"
 
@@ -745,8 +792,8 @@ def _coverage_values(road_geometry, buffers_by_id, buffer_index, length_to_m=1.0
             intersection = road_geometry.intersection(buffer)
             if not intersection.isNull() and not intersection.isEmpty():
                 overlaps.append(float(intersection.length()))
-        except Exception:
-            continue
+        except _GEOMETRY_ERRORS:
+            _note_event("a road/buffer overlap could not be measured and was ignored")
     max_overlap = max(overlaps) if overlaps else 0.0
     remaining_length = max(original_length - max_overlap, 0.0)
     remaining_ratio = remaining_length / original_length if original_length > 0 else 1.0
@@ -1195,27 +1242,8 @@ def _methodology_2(base_roads, classified_secondary, dissolved_mask, configurati
 
 def _square_buffer(geometry, distance):
     """Use flat/square end caps, as Shapely buffer(cap_style=3) does."""
-    # QGIS changed enum locations across 3.x releases; try the current API,
-    # then the legacy QgsGeometry enum, then fall back to a standard buffer.
-    attempts = []
-    try:
-        attempts.append((Qgis.EndCapStyle.Square, Qgis.JoinStyle.Round))
-    except Exception:
-        pass
-    try:
-        attempts.append((QgsGeometry.EndCapStyle.Square, QgsGeometry.JoinStyle.Round))
-    except Exception:
-        pass
-    try:
-        attempts.append((QgsGeometry.CapSquare, QgsGeometry.JoinStyle.Round))
-    except Exception:
-        pass
-    for cap, join in attempts:
-        try:
-            return geometry.buffer(float(distance), 8, cap, join, 2.0)
-        except Exception:
-            continue
-    return geometry.buffer(float(distance), 8)
+    # QGIS changed enum locations across versions; see _cap_join_candidates().
+    return _buffer_with_caps(geometry, distance, 8, "Square")
 
 
 def _explode_line_layer(layer, name):
@@ -1261,7 +1289,8 @@ def _vertices_for_buffered_base(base_roads, secondary_buffers, target_crs, log=N
             try:
                 if not geometry.intersects(polygon):
                     continue
-            except Exception:
+            except _GEOMETRY_ERRORS:
+                _note_event("a base-road/buffer intersection test failed; road skipped for that buffer")
                 continue
             clipped = _safe_intersection(geometry, polygon)
             parts = _line_parts(clipped)
@@ -1499,8 +1528,8 @@ def _methodology_3(base_roads, classified_secondary, dissolved_mask, configurati
             try:
                 if buffer_geometry.contains(geom):
                     sec_vertices_inside.append((geom, attrs + [buffer_id_by_fid[buffer_fid]]))
-            except Exception:
-                continue
+            except _GEOMETRY_ERRORS:
+                _note_event("a vertex-in-buffer test failed; vertex not assigned to that buffer")
     secondary_vertices_in_buffer = _point_layer(
         "Secondary_Vertices_InBuffer", target_crs, sec_vertices_inside,
         [make_field("vertex_id", "longlong"),
@@ -1581,8 +1610,8 @@ def _methodology_3(base_roads, classified_secondary, dissolved_mask, configurati
                         line_centroid = geom.centroid()
                         centroid_distance = buffer_centroid.distance(line_centroid)
                         candidate_buffers.append((centroid_distance, buffer_id_by_fid[buffer_fid]))
-                except Exception:
-                    continue
+                except _GEOMETRY_ERRORS:
+                    _note_event("a road/buffer association test failed; that buffer was not considered")
             associated = min(candidate_buffers)[1] if candidate_buffers else None
             local_records = vertices_by_buffer.get(associated, []) if associated is not None else []
             for part in parts:
@@ -1675,7 +1704,7 @@ def _log_legacy_summary(base_roads, classified_secondary, base_label, secondary_
             if value == value and abs(value) != float("inf"):
                 ratios.append(value)
         except (TypeError, ValueError):
-            pass
+            _note_event("a coverage ratio value could not be read as a number and was left out of the summary")
 
     base_length_m = sum(_line_length(f.geometry()) for f in base_roads.getFeatures()) * length_to_m
     total_secondary_km = secondary_length_m / 1000.0
@@ -1771,6 +1800,7 @@ def run_legacy_workflow(priority_roads, secondary_roads, study_area, configurati
     _log(log, "=" * 58)
     _log(log, "Road Network Integration Toolkit — legacy workflow port")
     _log(log, "Runtime: {}".format(runtime_summary()))
+    _WORKER_STATE.events = {}
     _log(log, "Priority dataset: {} | Secondary dataset: {}".format(base_label, secondary_label))
     _log(log, "Methodology: {} | Analysis CRS: {}".format(method.replace("methodology_", "Methodology "), target_crs.authid() or target_crs.description()))
     _log(log, "Output prefix: {}".format(prefix))
@@ -1831,6 +1861,7 @@ def run_legacy_workflow(priority_roads, secondary_roads, study_area, configurati
         raise RuntimeError("The selected methodology did not produce a non-empty merged road network.")
 
     _check_cancel(log)
+    _log_events(log)
     output_path, output_layer = _write_final(final, configuration, log)
     result = {
         "output_path": output_path,

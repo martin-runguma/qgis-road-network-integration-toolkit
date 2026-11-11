@@ -81,7 +81,8 @@ class FakeQgsNull:
 
 def install(style):
     """Install fake qgis modules for ``style`` ('legacy' or 'modern')."""
-    assert style in ("legacy", "modern")
+    if style not in ("legacy", "modern"):
+        raise ValueError("style must be 'legacy' or 'modern'")
     purge_plugin_and_qgis_modules()
 
     qgis = _AutoModule("qgis")

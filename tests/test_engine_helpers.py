@@ -90,6 +90,90 @@ class _EngineBase:
         self.engine._check_cancel(lambda m: None)
 
 
+    # -- skipped-event reporting ---------------------------------------------
+    def test_events_are_counted_and_logged_once_per_kind(self):
+        engine = self.engine
+        engine._WORKER_STATE.events = {}
+        engine._note_event("thing A failed")
+        engine._note_event("thing A failed")
+        engine._note_event("thing B failed")
+        lines = []
+
+        class Log:
+            def warning(self, message):
+                lines.append(message)
+
+        engine._log_events(Log())
+        self.assertEqual(len(lines), 2)
+        self.assertIn("thing A failed (2 times)", lines[0])
+        self.assertIn("thing B failed (1 time)", lines[1])
+
+    def test_no_events_means_no_log_noise(self):
+        self.engine._WORKER_STATE.events = {}
+        lines = []
+
+        class Log:
+            def warning(self, message):
+                lines.append(message)
+
+        self.engine._log_events(Log())
+        self.assertEqual(lines, [])
+
+    # -- buffer end-cap helper -------------------------------------------------
+    def test_cap_candidates_never_raise_when_enums_are_missing(self):
+        self.assertIsInstance(self.engine._cap_join_candidates("Flat"), list)
+
+    def test_cap_candidates_find_new_and_old_enum_spellings(self):
+        engine = self.engine
+
+        class NS:
+            def __init__(self, **kw):
+                self.__dict__.update(kw)
+
+        new_style = NS(EndCapStyle=NS(Flat="new-flat", Square="new-square"), JoinStyle=NS(Round="new-round"))
+        old_style = NS(EndCapStyle=NS(CapFlat="old-flat", CapSquare="old-square"), JoinStyle=NS(JoinRound="old-round"))
+        engine.Qgis, engine.QgsGeometry = new_style, NS()
+        self.assertEqual(engine._cap_join_candidates("Flat"), [("new-flat", "new-round")])
+        engine.Qgis, engine.QgsGeometry = NS(), old_style
+        self.assertEqual(engine._cap_join_candidates("Square"), [("old-square", "old-round")])
+        engine.Qgis, engine.QgsGeometry = new_style, old_style
+        self.assertEqual(len(engine._cap_join_candidates("Flat")), 2)
+
+    def test_buffer_falls_back_loudly_not_silently(self):
+        engine = self.engine
+        engine._WORKER_STATE.events = {}
+        calls = []
+
+        class Geometry:
+            def buffer(self, *args):
+                calls.append(args)
+                return "buffered"
+
+        # With no usable cap enums on the stub, the plain buffer is used AND recorded.
+        self.assertEqual(engine._buffer_with_caps(Geometry(), 10, 8, "Flat"), "buffered")
+        self.assertEqual(calls[-1], (10.0, 8))
+        self.assertTrue(any("round-cap" in key for key in engine._WORKER_STATE.events))
+
+    def test_buffer_uses_first_cap_style_that_works(self):
+        engine = self.engine
+        engine._WORKER_STATE.events = {}
+        engine._cap_join_candidates = lambda name: [("bad-cap", "j"), ("good-cap", "j")]
+
+        class Geometry:
+            def buffer(self, distance, segments, cap=None, join=None, miter=None):
+                if cap == "bad-cap":
+                    raise TypeError("wrong enum")
+                return ("ok", cap)
+
+        self.assertEqual(engine._buffer_with_caps(Geometry(), 5, 8, "Flat"), ("ok", "good-cap"))
+        self.assertEqual(engine._WORKER_STATE.events, {})
+
+    def test_geometry_errors_are_narrow(self):
+        # A KeyError is a bug and must not be swallowed like a geometry failure.
+        self.assertNotIn(KeyError, self.engine._GEOMETRY_ERRORS)
+        self.assertIn(RuntimeError, self.engine._GEOMETRY_ERRORS)
+
+
 class LegacyEngineTests(_EngineBase, unittest.TestCase):
     style = "legacy"
 

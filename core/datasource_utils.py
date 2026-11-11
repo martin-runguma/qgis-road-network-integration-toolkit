@@ -85,21 +85,19 @@ def discover_vector_layers(path: str) -> List[VectorLayerChoice]:
                 choices.append(choice)
 
     if not choices:
-        try:
-            layer = QgsVectorLayer(path, os.path.basename(path.rstrip("/\\")), "ogr")
-            if layer.isValid():
-                choices.append(
-                    VectorLayerChoice(
-                        name=layer.name(),
-                        uri=path,
-                        provider="ogr",
-                        feature_count=layer.featureCount(),
-                        geometry_type=QgsWkbTypes.geometryType(layer.wkbType()),
-                        crs_authid=layer.crs().authid() if layer.crs().isValid() else "",
-                    )
+        # QgsVectorLayer does not raise for unreadable paths; it returns an invalid layer.
+        layer = QgsVectorLayer(path, os.path.basename(path.rstrip("/\\")), "ogr")
+        if layer.isValid():
+            choices.append(
+                VectorLayerChoice(
+                    name=layer.name(),
+                    uri=path,
+                    provider="ogr",
+                    feature_count=layer.featureCount(),
+                    geometry_type=QgsWkbTypes.geometryType(layer.wkbType()),
+                    crs_authid=layer.crs().authid() if layer.crs().isValid() else "",
                 )
-        except Exception:
-            pass
+            )
 
     return choices
 

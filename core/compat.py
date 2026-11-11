@@ -85,12 +85,14 @@ NULL_GEOMETRY = _geometry_constant("Null", "NullGeometry")
 # ---------------------------------------------------------------------------
 
 def _meters_unit():
+    # QGIS >= 3.30 / 4.x: Qgis.DistanceUnit.Meters
     unit_enum = getattr(Qgis, "DistanceUnit", None)
     if unit_enum is not None:
         value = getattr(unit_enum, "Meters", None)
         if value is not None:
             return value
-    return QgsUnitTypes.DistanceMeters
+    # QGIS 3.28: QgsUnitTypes.DistanceUnit.DistanceMeters (or the flat name)
+    return scoped_enum(QgsUnitTypes, "DistanceUnit", "DistanceMeters")
 
 
 METERS = _meters_unit()
@@ -197,14 +199,12 @@ def is_null(value):
     if QVariant is not None and isinstance(value, QVariant):
         try:
             return bool(value.isNull())
-        except Exception:
+        except (TypeError, RuntimeError):
             return False
     try:
-        if type(value) is type(NULL):
-            return bool(value == NULL)
-    except Exception:
-        pass
-    return False
+        return type(value) is type(NULL) and bool(value == NULL)
+    except (TypeError, ValueError, RuntimeError):
+        return False
 
 
 def clean_text(value):

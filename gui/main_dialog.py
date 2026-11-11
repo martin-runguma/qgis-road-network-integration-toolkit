@@ -4,10 +4,9 @@
 This stage provides file-based input selectors, a QGIS CRS selector,
 methodology selection, and output-folder controls. All three methodologies use the shared legacy-compatible processing engine.
 
-Log colours: black = normal, green = success, orange = warning, red = error.
+Log messages use plain text, with WARNING/ERROR tags for severity.
 """
 
-import html
 import os
 from contextlib import contextmanager
 from datetime import datetime
@@ -31,6 +30,7 @@ from qgis.PyQt.QtWidgets import (
     QFormLayout, QFrame, QGroupBox, QHBoxLayout, QLabel,
     QLineEdit, QMenu, QMessageBox, QPlainTextEdit, QProgressBar, QPushButton, QScrollArea,
     QVBoxLayout, QWidget,
+    QSizePolicy,
 )
 
 from ..core.compat import (
@@ -40,6 +40,8 @@ from ..core.datasource_utils import (
     datasource_exists, gdb_write_supported, geometry_matches,
     geometry_description, is_file_geodatabase, load_vector_layer,
 )
+from .. import i18n
+from . import theme
 
 
 # ----------------------------------------------------------------------
@@ -47,15 +49,8 @@ from ..core.datasource_utils import (
 # ----------------------------------------------------------------------
 SETTINGS_PREFIX = "RoadNetworkIntegration/"
 
-# Log colours, chosen to stay readable on the log's white background.
-LOG_COLOURS = {
-    "info": "#000000",     # normal text: black
-    "success": "#1E7B34",  # green
-    "warning": "#C25E00",  # orange
-    "error": "#C62828",    # red
-}
 
-# Words added to warning/error lines so the meaning never depends on colour alone.
+# Words added to warning/error lines so severity is visible in plain text.
 LOG_TAGS = {"info": "", "success": "", "warning": "WARNING", "error": "ERROR"}
 
 # Workflow defaults taken from the finalized road-merging scripts (metres).
@@ -101,6 +96,14 @@ def _run_dialog(dialog):
     return runner()
 
 
+def _hint(text):
+    """Supporting copy under a control: muted, wrapped and visually quiet."""
+    label = QLabel(text)
+    label.setObjectName("hint")
+    label.setWordWrap(True)
+    return label
+
+
 _GEOMETRY_KINDS = (
     ("point", POINT_GEOMETRY),
     ("line", LINE_GEOMETRY),
@@ -131,48 +134,30 @@ def invalid_name_chars(name):
     return sorted({c for c in name if c in INVALID_NAME_CHARS or ord(c) < 32})
 
 
-def format_log_html(message, level="info", bold=False, stamp=None):
-    """Return one colour-coded, HTML-escaped log line."""
-    colour = LOG_COLOURS.get(level, LOG_COLOURS["info"])
-    tag = LOG_TAGS.get(level, "")
-    stamp = stamp or datetime.now().strftime("%H:%M:%S")
-    text = "[{}] ".format(stamp)
-    if tag:
-        text += "{}: ".format(tag)
-    text += str(message)
-    escaped = html.escape(text).replace("\n", "<br>").replace("  ", "&nbsp;&nbsp;")
-    if bold:
-        escaped = "<b>{}</b>".format(escaped)
-    return '<span style="color:{};">{}</span>'.format(colour, escaped)
-
-
 class LayerChooserDialog(QDialog):
     """Themed layer picker: choose one feature layer from a drop-down.
 
     Replaces QInputDialog so the chooser matches the main toolkit window.
     """
 
-    def __init__(self, parent, prompt, labels):
+    def __init__(self, parent, prompt, labels, lang="en"):
         super().__init__(parent)
-        self.setObjectName("RoadNetworkChooserDialog")
-        self.setWindowTitle("Choose feature layer")
+        self.lang = lang
+        self.setWindowTitle(i18n.tr("dlg_choose_layer", lang))
         self.setModal(True)
-        self.setMinimumWidth(660)
+        self.setMinimumWidth(640)
+        self.resize(660, 260)
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(14, 14, 14, 14)
-        layout.setSpacing(10)
+        layout.setContentsMargins(20, 18, 20, 16)
+        layout.setSpacing(12)
 
-        heading = QLabel("Choose feature layer")
-        heading.setObjectName("pluginTitle")
-        subtitle = QLabel(prompt)
-        subtitle.setObjectName("pluginSubtitle")
-        subtitle.setWordWrap(True)
-        layout.addWidget(heading)
-        layout.addWidget(subtitle)
+        layout.addWidget(_hint(prompt))
 
-        card = QGroupBox("Available feature layers")
-        card_layout = QVBoxLayout(card)
+        group = QGroupBox(i18n.tr("dlg_available_layers", lang))
+        group_layout = QVBoxLayout(group)
+        group_layout.setContentsMargins(0, 20, 0, 4)
+        group_layout.setSpacing(8)
         self.combo = QComboBox()
         self.combo.addItems(labels)
         self.combo.setMaxVisibleItems(12)
@@ -182,19 +167,20 @@ class LayerChooserDialog(QDialog):
         )
         # Let the drop-down list be as wide as its longest entry.
         self.combo.view().setMinimumWidth(self.combo.view().sizeHintForColumn(0) + 24)
-        self.detail = QLabel()
-        self.detail.setObjectName("helpText")
-        self.detail.setWordWrap(True)
+        self.detail = _hint("")
         self.detail.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
         self.combo.currentIndexChanged.connect(self._update_detail)
-        card_layout.addWidget(self.combo)
-        card_layout.addWidget(self.detail)
-        layout.addWidget(card)
+        group_layout.addWidget(self.combo)
+        group_layout.addWidget(self.detail)
+        layout.addWidget(group)
+
+        layout.addStretch(1)
 
         buttons = QHBoxLayout()
+        buttons.setSpacing(8)
         buttons.addStretch(1)
-        cancel_button = QPushButton("Cancel")
-        select_button = QPushButton("Select layer")
+        cancel_button = QPushButton(i18n.tr("dlg_cancel", lang))
+        select_button = QPushButton(i18n.tr("dlg_select_layer", lang))
         select_button.setObjectName("primaryButton")
         select_button.setDefault(True)
         cancel_button.clicked.connect(self.reject)
@@ -203,11 +189,12 @@ class LayerChooserDialog(QDialog):
         buttons.addWidget(select_button)
         layout.addLayout(buttons)
 
+        theme.apply_theme(self)
         self._update_detail()
 
     def _update_detail(self, *_args):
         """Show the full text of the highlighted layer (long names are elided in the box)."""
-        self.detail.setText("Selected: {}".format(self.combo.currentText()))
+        self.detail.setText(i18n.tr("dlg_selected", self.lang).format(name=self.combo.currentText()))
 
     def selected_index(self):
         """Index of the chosen layer in the list of labels given to the dialog."""
@@ -239,128 +226,210 @@ class RoadNetworkIntegrationDialog(QDialog):
         self._is_processing = False
         self._run_log_path = ""
         self._run_log_error = ""
+        self.lang = i18n.default_language()
+        self._i18n = []  # (key, setter) pairs re-applied when the language changes
         plugin_dir = os.path.dirname(os.path.dirname(__file__))
+        self._icon_path = os.path.join(plugin_dir, "icon.png")
         self.setObjectName("RoadNetworkIntegrationDialog")
-        self.setWindowTitle("Road Network Integration Toolkit")
-        self.setWindowIcon(QIcon(os.path.join(plugin_dir, "icon.png")))
+        self._t("win_title", self.setWindowTitle)
+        self.setWindowIcon(QIcon(self._icon_path))
         self.setModal(False)
         # Request a native minimise button beside the standard close button.
         self.setWindowFlags(self.windowFlags() | Qt.WindowType.WindowMinimizeButtonHint)
         # Closing destroys this instance; reopening the plugin creates a clean dialog.
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)
-        self.resize(900, 850)
-        self.setMinimumSize(820, 740)
+        # Fit comfortably on smaller displays without dropping below the
+        # minimum usable size.
+        self.setMinimumSize(840, 640)
+        screen = QApplication.primaryScreen()
+        width, height = 1000, 960
+        if screen is not None:
+            available = screen.availableGeometry()
+            width = max(840, min(width, available.width() - 80))
+            height = max(640, min(height, available.height() - 80))
+        self.resize(width, height)
         self._build_ui()
         self._load_settings()
         self._update_output_preview()
+        self._apply_direction()
+
+    # ------------------------------------------------------------------
+    # Language handling
+    # ------------------------------------------------------------------
+    def T(self, key, **fmt):
+        """Text for `key` in the current interface language."""
+        text = i18n.tr(key, self.lang)
+        return text.format(**fmt) if fmt else text
+
+    def _t(self, key, setter, **fmt):
+        """Set a translatable text now and re-apply it on language change."""
+        setter(self.T(key, **fmt))
+        self._i18n.append((key, lambda text, s=setter: s(text), fmt))
+
+    def _row_label(self, key, suffix=""):
+        """A form-row label that follows the interface language."""
+        label = QLabel()
+        self._t(key, lambda text, w=label, x=suffix: w.setText(text + x))
+        return label
+
+    def _on_language_changed(self, index):
+        code = self.language_combo.itemData(index)
+        if not code or code == self.lang:
+            return
+        self.lang = code
+        i18n.save_language(code)
+        for key, setter, fmt in self._i18n:
+            setter(self.T(key, **fmt))
+        for index, key in enumerate(self._output_format_keys):
+            self.output_type_combo.setItemText(index, self.T(key))
+        self._apply_direction()
+        self._update_output_preview()
+
+    def _apply_direction(self):
+        """Apply RTL layout for RTL languages; paths and the log remain LTR."""
+        rtl = self.lang in i18n.RTL_LANGUAGES
+        self.setLayoutDirection(
+            Qt.LayoutDirection.RightToLeft if rtl else Qt.LayoutDirection.LeftToRight
+        )
+        ltr = Qt.LayoutDirection.LeftToRight
+        for widget in (self.log_output, self.output_path, self.output_name,
+                       self.output_preview, self.priority_path[1],
+                       self.secondary_path[1], self.boundary_path[1]):
+            widget.setLayoutDirection(ltr)
 
     # ------------------------------------------------------------------
     # UI construction
     # ------------------------------------------------------------------
     def _build_ui(self):
-        """Build a scrollable, OSM-Toolkit-inspired interface."""
+        """Compose header, scrollable form, status panel and action bar."""
         outer_layout = QVBoxLayout(self)
-        outer_layout.setContentsMargins(10, 10, 10, 10)
-        outer_layout.setSpacing(8)
+        outer_layout.setContentsMargins(0, 0, 0, 0)
+        outer_layout.setSpacing(0)
+
+        outer_layout.addWidget(self._build_header())
 
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
-        scroll.setFrameShape(QFrame.Shape.NoFrame)
-        content = QWidget()
-        content.setObjectName("contentWidget")
-        root = QVBoxLayout(content)
-        root.setContentsMargins(8, 8, 8, 8)
-        root.setSpacing(12)
+        page = QWidget()
+        page.setObjectName("page")
+        root = QVBoxLayout(page)
+        root.setContentsMargins(24, 4, 24, 8)
+        root.setSpacing(6)
 
-        root.addLayout(self._build_header())
         root.addWidget(self._build_input_group())
         root.addWidget(self._build_settings_group())
-        root.addWidget(self._build_advanced_group())
         root.addWidget(self._build_output_group())
-        root.addWidget(self._build_log_group())
+        root.addWidget(self._build_advanced_group())
+        root.addStretch(1)
 
-        scroll.setWidget(content)
+        scroll.setWidget(page)
         outer_layout.addWidget(scroll, 1)
+        outer_layout.addWidget(self._build_status_panel())
+        outer_layout.addWidget(self._build_footer())
 
-        line = QFrame()
-        line.setFrameShape(QFrame.Shape.HLine)
-        line.setFrameShadow(QFrame.Shadow.Sunken)
-        outer_layout.addWidget(line)
-        outer_layout.addLayout(self._build_buttons())
-
-        self._apply_stylesheet()
+        theme.apply_theme(self)
 
     def _build_header(self):
-        """Title and subtitle using the OSM Data Toolkit blue/green palette."""
-        header = QHBoxLayout()
-        title_col = QVBoxLayout()
-        title = QLabel("Road Network Integration Toolkit")
-        title.setObjectName("pluginTitle")
-        subtitle = QLabel("Integrate complementary road networks using a guided workflow")
-        subtitle.setObjectName("pluginSubtitle")
-        title_col.addWidget(title)
-        title_col.addWidget(subtitle)
-        header.addLayout(title_col, 1)
+        """Compact application header with product identity."""
+        header = QFrame()
+        header.setObjectName("appHeader")
+        row = QHBoxLayout(header)
+        row.setContentsMargins(24, 14, 24, 14)
+        row.setSpacing(12)
+
+        mark = QLabel()
+        mark.setPixmap(QIcon(self._icon_path).pixmap(30, 30))
+        row.addWidget(mark, 0, Qt.AlignmentFlag.AlignVCenter)
+
+        text_column = QVBoxLayout()
+        text_column.setSpacing(1)
+        title = QLabel()
+        title.setObjectName("appTitle")
+        self._t("win_title", title.setText)
+        subtitle = QLabel()
+        subtitle.setObjectName("appSubtitle")
+        self._t("app_subtitle", subtitle.setText)
+        text_column.addWidget(title)
+        text_column.addWidget(subtitle)
+        row.addLayout(text_column, 1)
+
+        # Language selector, remembered between sessions.
+        language_label = QLabel()
+        self._t("language", language_label.setText)
+        self.language_combo = QComboBox()
+        for code, name in i18n.LANGUAGES:
+            self.language_combo.addItem(name, code)
+        self.language_combo.setCurrentIndex(max(0, self.language_combo.findData(self.lang)))
+        self.language_combo.currentIndexChanged.connect(self._on_language_changed)
+        row.addWidget(language_label, 0, Qt.AlignmentFlag.AlignVCenter)
+        row.addWidget(self.language_combo, 0, Qt.AlignmentFlag.AlignVCenter)
         return header
+
+    def _hint_t(self, key):
+        """Muted supporting copy that follows the interface language."""
+        label = _hint("")
+        self._t(key, label.setText)
+        return label
+
+    def _form_layout(self, parent):
+        """Consistent two-column form used by every section."""
+        form = QFormLayout(parent)
+        form.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.ExpandingFieldsGrow)
+        form.setLabelAlignment(
+            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
+        )
+        form.setFormAlignment(
+            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop
+        )
+        form.setHorizontalSpacing(16)
+        form.setVerticalSpacing(10)
+        return form
 
     def _build_input_group(self):
         """1. Input data: each row has a path field and matching browse controls."""
-        input_group = QGroupBox("1. Input data")
-        input_layout = QFormLayout(input_group)
-        input_layout.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.ExpandingFieldsGrow)
-        input_layout.setLabelAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
-        input_layout.setHorizontalSpacing(12)
-        input_layout.setVerticalSpacing(9)
+        input_group = QGroupBox()
+        self._t("grp_input", input_group.setTitle)
+        input_layout = self._form_layout(input_group)
 
         self.priority_path = self._make_path_row(
-            "Select the priority road dataset", self.LABEL_PRIORITY, "line"
+            "ph_priority", self.LABEL_PRIORITY, "line"
         )
         self.secondary_path = self._make_path_row(
-            "Select the secondary road dataset", self.LABEL_SECONDARY, "line"
+            "ph_secondary", self.LABEL_SECONDARY, "line"
         )
         self.boundary_path = self._make_path_row(
-            "Select the study-area boundary", self.LABEL_BOUNDARY, "polygon"
+            "ph_boundary", self.LABEL_BOUNDARY, "polygon"
         )
-        input_layout.addRow("Priority road network (Path):", self.priority_path[0])
-        input_layout.addRow("Secondary road network (Path):", self.secondary_path[0])
-        input_layout.addRow("Study area boundary (Polygon):", self.boundary_path[0])
+        input_layout.addRow(self._row_label("lbl_priority"), self.priority_path[0])
+        input_layout.addRow(self._row_label("lbl_secondary"), self.secondary_path[0])
+        input_layout.addRow(self._row_label("lbl_boundary"), self.boundary_path[0])
 
-        supported_note = QLabel(
-            "Use Browse to choose a vector file or a layer inside a GeoPackage (.gpkg) or "
-            "File Geodatabase (.gdb). Only layers with the expected geometry type (lines for "
-            "roads, polygons for the boundary) are offered."
-        )
-        supported_note.setWordWrap(True)
+        supported_note = self._hint_t("hint_input")
         input_layout.addRow(supported_note)
         return input_group
 
     def _build_settings_group(self):
         """2. Integration settings: methodology and analysis CRS."""
-        settings_group = QGroupBox("2. Integration settings")
-        settings_form = QFormLayout(settings_group)
-        settings_form.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.ExpandingFieldsGrow)
-        settings_form.setVerticalSpacing(9)
+        settings_group = QGroupBox()
+        self._t("grp_settings", settings_group.setTitle)
+        settings_form = self._form_layout(settings_group)
 
         self.method_combo = QComboBox()
         self.method_model = QStandardItemModel(self.method_combo)
-        method1 = QStandardItem("Methodology 1 — Direct Merge")
-        method1.setData("methodology_1", Qt.ItemDataRole.UserRole)
-        self.method_model.appendRow(method1)
-        for label, key in (
-            ("Methodology 2 — Clip + Snap", "methodology_2"),
-            ("Methodology 3 — Targeted Snap", "methodology_3"),
+        for text_key, key in (
+            ("meth_1", "methodology_1"),
+            ("meth_2", "methodology_2"),
+            ("meth_3", "methodology_3"),
         ):
-            item = QStandardItem(label)
+            item = QStandardItem()
             item.setData(key, Qt.ItemDataRole.UserRole)
+            self._t(text_key, item.setText)
             self.method_model.appendRow(item)
+        self.method_combo.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.method_combo.setModel(self.method_model)
         self.method_combo.setCurrentIndex(max(0, self.method_combo.findData("methodology_3")))
-        self.method_combo.setToolTip(
-            "Methodology 1 directly merges secondary roads classified as missing_1 to missing_4. "
-            "Methodology 2 trims secondary roads by priority-road buffers and snaps their endpoints. "
-            "Methodology 3 uses secondary square buffers and targeted centroid/endpoint snapping."
-        )
-        settings_form.addRow("Merging methodology:", self.method_combo)
+        self._t("tip_method", self.method_combo.setToolTip)
+        settings_form.addRow(self._row_label("lbl_method"), self.method_combo)
 
         # CRS selector plus a shortcut that suggests the UTM zone of the study area.
         crs_row = QHBoxLayout()
@@ -368,41 +437,30 @@ class RoadNetworkIntegrationDialog(QDialog):
         project_crs = QgsProject.instance().crs()
         if project_crs.isValid():
             self.crs_widget.setCrs(project_crs)
-        self.crs_widget.setToolTip(
-            "Choose the projected coordinate reference system used for distance and snapping operations. "
-            "Select a suitable local projected CRS for your study area."
-        )
+        self._t("tip_crs", self.crs_widget.setToolTip)
         self.crs_widget.crsChanged.connect(self._on_crs_changed)
-        self.suggest_crs_button = QPushButton("Suggest from study area")
-        self.suggest_crs_button.setToolTip(
-            "Select the UTM zone that contains the centre of the study-area boundary."
-        )
+        self.suggest_crs_button = QPushButton()
+        self._t("btn_suggest_crs", self.suggest_crs_button.setText)
+        self._t("tip_suggest_crs", self.suggest_crs_button.setToolTip)
         self.suggest_crs_button.clicked.connect(self._on_suggest_crs_clicked)
         crs_row.addWidget(self.crs_widget, 1)
         crs_row.addWidget(self.suggest_crs_button)
-        settings_form.addRow("Analysis CRS / projection:", crs_row)
+        settings_form.addRow(self._row_label("lbl_crs"), crs_row)
 
-        crs_note = QLabel(
-            "Choose this the same way you select a CRS in QGIS export or reprojection tools. "
-            "A projected CRS with metre units is required for distance-based processing. "
-            "When you pick a study-area boundary, a suitable UTM zone is suggested automatically "
-            "unless you have already chosen a CRS yourself."
-        )
-        crs_note.setWordWrap(True)
+        crs_note = self._hint_t("hint_crs")
         settings_form.addRow(crs_note)
         return settings_group
 
     def _build_advanced_group(self):
         """Advanced settings: defaults are shown but disabled until the group is ticked."""
-        self.advanced_group = QGroupBox("Advanced settings — check to edit")
+        self.advanced_group = QGroupBox()
+        self._t("grp_advanced", self.advanced_group.setTitle)
         self.advanced_group.setCheckable(True)
         self.advanced_group.setChecked(False)
 
-        advanced_form = QFormLayout(self.advanced_group)
-        advanced_form.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.ExpandingFieldsGrow)
-        advanced_form.setVerticalSpacing(8)
+        advanced_form = self._form_layout(self.advanced_group)
 
-        def make_distance_control(default_value, tooltip):
+        def make_distance_control(default_value, tooltip_key):
             """Create a distance input with metre units and a default value."""
             control = QDoubleSpinBox()
             control.setRange(0.01, 100000.0)
@@ -410,23 +468,23 @@ class RoadNetworkIntegrationDialog(QDialog):
             control.setSingleStep(1.0)
             control.setSuffix(" m")
             control.setValue(default_value)
-            control.setToolTip(tooltip)
+            self._t(tooltip_key, control.setToolTip)
             return control
 
         self.base_buffer_spin = make_distance_control(
-            ADVANCED_DEFAULTS["base_buffer"], "Buffer distance for the priority road network."
+            ADVANCED_DEFAULTS["base_buffer"], "tip_base_buffer"
         )
         self.secondary_buffer_spin = make_distance_control(
-            ADVANCED_DEFAULTS["secondary_buffer"], "Buffer distance for the secondary road network."
+            ADVANCED_DEFAULTS["secondary_buffer"], "tip_secondary_buffer"
         )
         self.join_gap_spin = make_distance_control(
-            ADVANCED_DEFAULTS["join_gap"], "Maximum snapping distance between road features."
+            ADVANCED_DEFAULTS["join_gap"], "tip_join_gap"
         )
         self.mid_gap_spin = make_distance_control(
-            ADVANCED_DEFAULTS["mid_gap"], "Midpoint densification interval."
+            ADVANCED_DEFAULTS["mid_gap"], "tip_mid_gap"
         )
         self.centroid_max_dist_spin = make_distance_control(
-            ADVANCED_DEFAULTS["centroid_max_dist"], "Maximum centroid-to-vertex adjustment distance."
+            ADVANCED_DEFAULTS["centroid_max_dist"], "tip_centroid_max_dist"
         )
         self._advanced_spins = {
             "base_buffer": self.base_buffer_spin,
@@ -435,213 +493,180 @@ class RoadNetworkIntegrationDialog(QDialog):
             "mid_gap": self.mid_gap_spin,
             "centroid_max_dist": self.centroid_max_dist_spin,
         }
-        for key, label in ADVANCED_LABELS:
-            advanced_form.addRow(label + ":", self._advanced_spins[key])
+        self._advanced_labels = []
+        for key, _english_label in ADVANCED_LABELS:
+            field_label = self._row_label("adv_" + key, ":")
+            advanced_form.addRow(field_label, self._advanced_spins[key])
+            self._advanced_labels.append(field_label)
 
-        advanced_note = QLabel(
-            "The displayed values are the workflow defaults, in metres. "
-            "Tick Advanced settings to edit them; unticking restores the defaults. "
-            "These values are passed to the legacy-compatible processing engine for buffer, trimming, and snapping operations."
-        )
-        advanced_note.setWordWrap(True)
-        advanced_note.setObjectName("helpText")
+        advanced_note = self._hint_t("hint_advanced")
         advanced_form.addRow(advanced_note)
+        self._advanced_note = advanced_note
 
         self.advanced_group.toggled.connect(self._on_advanced_toggled)
+        self._on_advanced_toggled(False)
         return self.advanced_group
 
     def _build_output_group(self):
         """3. Output settings: the folder is both working folder and destination."""
-        output_group = QGroupBox("3. Output settings")
-        output_layout = QFormLayout(output_group)
-        output_layout.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.ExpandingFieldsGrow)
-        output_layout.setVerticalSpacing(9)
+        output_group = QGroupBox()
+        self._t("grp_output", output_group.setTitle)
+        output_layout = self._form_layout(output_group)
 
         output_row = QHBoxLayout()
         self.output_path = QLineEdit()
-        self.output_path.setPlaceholderText("Select the mandatory output / working folder...")
+        self._t("ph_output_folder", self.output_path.setPlaceholderText)
         self.output_path.setClearButtonEnabled(True)
-        self.output_path.setToolTip(
-            "Required. This folder will be used as both the working "
-            "directory and the output destination."
-        )
+        self._t("tip_output_folder", self.output_path.setToolTip)
         self.output_path.textChanged.connect(self._update_output_preview)
-        self.browse_output_button = QPushButton("Browse...")
+        self.browse_output_button = QPushButton()
+        self._t("btn_browse", self.browse_output_button.setText)
         self.browse_output_button.clicked.connect(self._browse_output_folder)
         output_row.addWidget(self.output_path, 1)
         output_row.addWidget(self.browse_output_button)
-        output_layout.addRow("Output / working folder:", output_row)
+        output_layout.addRow(self._row_label("lbl_output_folder"), output_row)
 
         self.output_name = QLineEdit()
-        self.output_name.setPlaceholderText("Enter a project or city code, e.g. KE_Nairobi")
-        self.output_name.setToolTip(
-            "Enter the prefix only. The toolkit adds "
-            "'{}' automatically.".format(self.OUTPUT_SUFFIX)
-        )
+        self._t("ph_output_name", self.output_name.setPlaceholderText)
+        self._t("tip_output_name", self.output_name.setToolTip, suffix=self.OUTPUT_SUFFIX)
         self.output_name.textChanged.connect(self._update_output_preview)
-        output_layout.addRow("Output name / prefix:", self.output_name)
+        output_layout.addRow(self._row_label("lbl_output_name"), self.output_name)
 
         self.output_type_combo = QComboBox()
-        self.output_type_combo.addItem("GeoPackage (.gpkg)", "gpkg")
-        self.output_type_combo.addItem("Shapefile (.shp)", "shp")
-        self.output_type_combo.addItem("File Geodatabase (.gdb)", "gdb")
-        self.output_type_combo.setToolTip(
-            "Choose the format for the final harmonized road-network output."
-        )
+        self.output_type_combo.addItem(self.T("fmt_gpkg"), "gpkg")
+        self.output_type_combo.addItem(self.T("fmt_shp"), "shp")
+        self.output_type_combo.addItem(self.T("fmt_gdb"), "gdb")
+        self._output_format_keys = ("fmt_gpkg", "fmt_shp", "fmt_gdb")
+        self.output_type_combo.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        self._t("tip_output_format", self.output_type_combo.setToolTip)
         self.output_type_combo.currentIndexChanged.connect(self._update_output_preview)
-        output_layout.addRow("Output data type:", self.output_type_combo)
+        output_layout.addRow(self._row_label("lbl_output_format"), self.output_type_combo)
 
-        self.output_preview = QLabel("Enter an output name to preview the final filename.")
+        self.output_preview = QLabel()
+        self.output_preview.setObjectName("previewValue")
+        self.output_preview.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        self.output_preview.setMinimumHeight(34)
         self.output_preview.setWordWrap(True)
-        self.output_preview.setObjectName("helpText")
         self.output_preview.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-        output_layout.addRow("Output preview:", self.output_preview)
+        output_layout.addRow(self._row_label("lbl_output_preview"), self.output_preview)
 
-        self.add_outputs_checkbox = QCheckBox(
-            "Automatically add successful outputs to the QGIS project"
-        )
+        self.add_outputs_checkbox = QCheckBox()
+        self._t("chk_add_outputs", self.add_outputs_checkbox.setText)
         self.add_outputs_checkbox.setChecked(False)
         output_layout.addRow("", self.add_outputs_checkbox)
 
-        self.keep_intermediates_checkbox = QCheckBox("Keep intermediate diagnostic layers")
+        self.keep_intermediates_checkbox = QCheckBox()
+        self._t("chk_keep_intermediates", self.keep_intermediates_checkbox.setText)
         self.keep_intermediates_checkbox.setChecked(False)
         output_layout.addRow("", self.keep_intermediates_checkbox)
         return output_group
 
-    def _build_log_group(self):
-        """Processing status, progress bar, and colour-coded process log."""
-        log_group = QGroupBox("Processing progress and log")
-        log_layout = QVBoxLayout(log_group)
-        self.processing_status_label = QLabel("Ready. Select your inputs and run a methodology.")
-        self.processing_status_label.setObjectName("helpText")
+    def _build_status_panel(self):
+        """Persistent progress and log area, kept visible while the form scrolls."""
+        panel = QFrame()
+        panel.setObjectName("statusPanel")
+        layout = QVBoxLayout(panel)
+        layout.setContentsMargins(24, 10, 24, 12)
+        layout.setSpacing(6)
+
+        self.processing_status_label = QLabel(self.T("status_ready"))
+        self.processing_status_label.setObjectName("statusText")
         self.processing_status_label.setWordWrap(True)
-        log_layout.addWidget(self.processing_status_label)
 
         self.processing_progress = QProgressBar()
         self.processing_progress.setRange(0, 100)
         self.processing_progress.setValue(0)
-        self.processing_progress.setTextVisible(True)
-        self.processing_progress.setFormat("%p%")
-        self.processing_progress.setMinimumHeight(18)
-        log_layout.addWidget(self.processing_progress)
+        self.processing_progress.setTextVisible(False)
 
         self.log_output = QPlainTextEdit()
         self.log_output.setReadOnly(True)
-        self.log_output.setPlaceholderText("Validation and processing messages will appear here.")
+        self._t("ph_log", self.log_output.setPlaceholderText)
         self.log_output.setMaximumBlockCount(3000)
-        self.log_output.setMinimumHeight(125)
-        log_layout.addWidget(self.log_output)
+        self.log_output.setMinimumHeight(72)
+        self.log_output.setMaximumHeight(76)
 
-        legend = QLabel(
-            '<span style="color:{info};">Black: normal</span> &nbsp;|&nbsp; '
-            '<span style="color:{success};">Green: success</span> &nbsp;|&nbsp; '
-            '<span style="color:{warning};">Orange: warning</span> &nbsp;|&nbsp; '
-            '<span style="color:{error};">Red: error</span>'.format(**LOG_COLOURS)
-        )
-        legend.setObjectName("helpText")
-        self.clear_log_button = QPushButton("Clear log")
+        self.progress_percent = QLabel("0%")
+        self.progress_percent.setObjectName("percentText")
+        self.clear_log_button = QPushButton()
+        self._t("btn_clear_log", self.clear_log_button.setText)
+        self.clear_log_button.setObjectName("ghostButton")
         self.clear_log_button.clicked.connect(self.log_output.clear)
-        legend_row = QHBoxLayout()
-        legend_row.addWidget(legend, 1)
-        legend_row.addWidget(self.clear_log_button)
-        log_layout.addLayout(legend_row)
-        return log_group
+
+        header_row = QHBoxLayout()
+        header_row.setSpacing(10)
+        title = QLabel()
+        self._t("panel_log", title.setText)
+        title.setObjectName("panelTitle")
+        header_row.addWidget(title)
+        header_row.addStretch(1)
+        header_row.addWidget(self.progress_percent)
+        header_row.addWidget(self.clear_log_button)
+
+        layout.addLayout(header_row)
+        layout.addWidget(self.processing_status_label)
+        layout.addWidget(self.processing_progress)
+        layout.addWidget(self.log_output)
+
+        self.processing_progress.valueChanged.connect(self._on_progress_changed)
+        return panel
+
+    def _on_progress_changed(self, value):
+        """Keep the numeric readout in step with the progress bar."""
+        self.progress_percent.setText("{}%".format(int(value)))
+
+    def _build_footer(self):
+        """Action bar separated from the working area."""
+        footer = QFrame()
+        footer.setObjectName("footer")
+        layout = QHBoxLayout(footer)
+        layout.setContentsMargins(24, 10, 24, 10)
+        layout.setSpacing(8)
+        layout.addLayout(self._build_buttons())
+        return footer
 
     def _build_buttons(self):
         """Validate / Run / Close buttons."""
         buttons = QHBoxLayout()
-        self.validate_button = QPushButton("Validate Inputs")
-        self.run_button = QPushButton("Run Integration")
+        buttons.setSpacing(8)
+        self.validate_button = QPushButton()
+        self._t("btn_validate", self.validate_button.setText)
+        self.run_button = QPushButton()
+        self._t("btn_run", self.run_button.setText)
         self.run_button.setObjectName("primaryButton")
         self.run_button.setEnabled(True)
-        self.cancel_button = QPushButton("Cancel Run")
+        self.cancel_button = QPushButton()
+        self._t("btn_cancel", self.cancel_button.setText)
+        self.cancel_button.setObjectName("dangerButton")
         self.cancel_button.setEnabled(False)
-        self.cancel_button.setToolTip(
-            "Stop the running integration. Processing stops at the next safe checkpoint, "
-            "and the final output is not replaced."
-        )
-        self.close_button = QPushButton("Close")
+        self._t("tip_cancel", self.cancel_button.setToolTip)
+        self.close_button = QPushButton()
+        self._t("btn_close", self.close_button.setText)
+        self.close_button.setObjectName("ghostButton")
         self.cancel_button.clicked.connect(self._cancel_run)
         self.validate_button.clicked.connect(self.validate_inputs)
         self.run_button.clicked.connect(self.run_integration)
         self.close_button.clicked.connect(self.close)
-        self.run_button.setToolTip(
-            "Run the selected integration methodology. Inputs and output settings will be checked before processing."
-        )
+        self._t("tip_run", self.run_button.setToolTip)
         buttons.addWidget(self.validate_button)
         buttons.addStretch(1)
+        buttons.addWidget(self.close_button)
         buttons.addWidget(self.cancel_button)
         buttons.addWidget(self.run_button)
-        buttons.addWidget(self.close_button)
         return buttons
-
-    def _apply_stylesheet(self):
-        """Light theme. Text colours are set explicitly so dark QGIS themes stay readable."""
-        self.setStyleSheet("""
-            QDialog#RoadNetworkIntegrationDialog, QDialog#RoadNetworkChooserDialog,
-            QMessageBox#RoadNetworkMessageBox, QFileDialog#RoadNetworkFileDialog { background: #F7F9FB; }
-            QMessageBox#RoadNetworkMessageBox QLabel, QFileDialog#RoadNetworkFileDialog QLabel {
-                color: #1B2A33; font-weight: 400;
-            }
-            QMessageBox#RoadNetworkMessageBox QPushButton:default {
-                color: #FFFFFF; background: #1499D6; border-color: #0B5E8E; font-weight: 600;
-            }
-            QMessageBox#RoadNetworkMessageBox QPushButton:default:hover { background: #0B5E8E; }
-            QFileDialog#RoadNetworkFileDialog QAbstractItemView {
-                background: #FFFFFF; color: #1B2A33; border: 1px solid #C9D5DE;
-                selection-background-color: #1499D6; selection-color: #FFFFFF;
-            }
-            QWidget#contentWidget { background: #F7F9FB; }
-            QGroupBox {
-                font-weight: 600; color: #17313F;
-                border: 1px solid #C9D5DE; border-radius: 6px;
-                margin-top: 10px; padding: 10px 8px 8px 8px;
-                background: #FFFFFF;
-            }
-            QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 5px; }
-            QGroupBox QLabel, QGroupBox QCheckBox { color: #1B2A33; font-weight: 400; }
-            QLabel#pluginTitle { font-size: 18px; font-weight: 700; color: #0B5E8E; }
-            QLabel#pluginSubtitle { color: #606A73; padding-bottom: 3px; }
-            QGroupBox QLabel#helpText { color: #596A75; font-weight: 400; }
-            QLineEdit, QComboBox, QDoubleSpinBox {
-                min-height: 25px; padding: 3px 6px; color: #1B2A33;
-                border: 1px solid #B8C7D1; border-radius: 4px; background: #FFFFFF;
-            }
-            QLineEdit:focus, QComboBox:focus, QDoubleSpinBox:focus { border: 1px solid #1499D6; }
-            QComboBox { combobox-popup: 0; }
-            QComboBox QAbstractItemView {
-                background: #FFFFFF; color: #1B2A33; border: 1px solid #B8C7D1; outline: 0;
-                selection-background-color: #1499D6; selection-color: #FFFFFF;
-            }
-            QDoubleSpinBox:disabled { color: #7A868E; background: #F0F3F5; }
-            QPushButton {
-                padding: 6px 12px; min-height: 23px; color: #1B2A33;
-                border: 1px solid #B8C7D1; border-radius: 4px; background: #F2F6F8;
-            }
-            QPushButton:hover { border-color: #1499D6; background: #EAF6FC; }
-            QPushButton:disabled { color: #8A9298; background: #E9ECEF; }
-            QPushButton#primaryButton { color: #FFFFFF; background: #1499D6; border-color: #0B5E8E; font-weight: 600; }
-            QPushButton#primaryButton:hover { background: #0B5E8E; }
-            QPushButton#primaryButton:disabled { color: #DDE7EE; background: #8FB9D1; border-color: #8FB9D1; }
-            QPlainTextEdit { border: 1px solid #C9D5DE; border-radius: 4px; background: #FFFFFF; color: #000000; }
-            QProgressBar { border: 1px solid #B8C7D1; border-radius: 4px; text-align: center; background: #FFFFFF; color: #17313F; }
-            QProgressBar::chunk { background: #1499D6; border-radius: 3px; }
-            QCheckBox { spacing: 7px; }
-        """)
 
     # ------------------------------------------------------------------
     # Path rows and browsing
     # ------------------------------------------------------------------
-    def _make_path_row(self, placeholder, label, geometry_kind):
+    def _make_path_row(self, placeholder_key, label, geometry_kind):
         """Create one path field with a Browse menu (vector file or File Geodatabase)."""
         row_widget = QWidget()
         row = QHBoxLayout(row_widget)
         row.setContentsMargins(0, 0, 0, 0)
         row.setSpacing(5)
         path_edit = QLineEdit()
-        path_edit.setPlaceholderText(placeholder)
+        self._t(placeholder_key, path_edit.setPlaceholderText)
         path_edit.setClearButtonEnabled(True)
-        path_edit.setToolTip(DEFAULT_PATH_TOOLTIP)
+        self._t("tip_path", path_edit.setToolTip)
         # The provider URI is stored separately from the friendly text shown to users.
         path_edit.setProperty("source_uri", "")
         path_edit.setProperty("source_path", "")
@@ -650,13 +675,14 @@ class RoadNetworkIntegrationDialog(QDialog):
         path_edit.textEdited.connect(lambda _text, edit=path_edit: self._clear_selected_source(edit))
 
         # Attaching the menu to the button makes it open right under Browse.
-        browse_button = QPushButton("Browse…")
-        browse_button.setToolTip(
-            "Browse for a vector file or a feature layer inside a GeoPackage/File Geodatabase"
-        )
+        browse_button = QPushButton()
+        self._t("btn_browse", browse_button.setText)
+        self._t("tip_browse", browse_button.setToolTip)
         menu = QMenu(browse_button)
-        file_action = menu.addAction("Vector file or GeoPackage…")
-        gdb_action = menu.addAction("File Geodatabase (.gdb)…")
+        file_action = menu.addAction("")
+        gdb_action = menu.addAction("")
+        self._t("menu_vector_file", file_action.setText)
+        self._t("menu_gdb", gdb_action.setText)
         file_action.triggered.connect(
             lambda _checked=False, edit=path_edit, title=label: self._browse_vector_file(edit, title)
         )
@@ -918,7 +944,7 @@ class RoadNetworkIntegrationDialog(QDialog):
                 ))
 
             chooser = LayerChooserDialog(
-                self, "Select the feature layer for {}:".format(title.lower()), labels
+                self, self.T("prompt_select_layer", name=title.lower()), labels, self.lang
             )
             if not _run_dialog(chooser):
                 return
@@ -1057,10 +1083,15 @@ class RoadNetworkIntegrationDialog(QDialog):
     # Advanced settings
     # ------------------------------------------------------------------
     def _on_advanced_toggled(self, checked):
-        """Unticking the group restores the defaults so the displayed values are the ones used."""
+        """Reveal advanced fields only when enabled and restore defaults when not."""
         if not checked:
             for key, spin in self._advanced_spins.items():
                 spin.setValue(ADVANCED_DEFAULTS[key])
+        for label in self._advanced_labels:
+            label.setVisible(checked)
+        for spin in self._advanced_spins.values():
+            spin.setVisible(checked)
+        self._advanced_note.setVisible(checked)
 
     def _advanced_values(self):
         """Current advanced distances in metres."""
@@ -1086,9 +1117,7 @@ class RoadNetworkIntegrationDialog(QDialog):
         filename = self._output_filename()
         folder = self.output_path.text().strip()
         if not filename:
-            self.output_preview.setText(
-                "Enter an output name (e.g. KE_Nairobi) to preview the final filename."
-            )
+            self.output_preview.setText(self.T("preview_empty"))
         elif folder:
             self.output_preview.setText(os.path.join(folder, filename))
         else:
@@ -1126,7 +1155,7 @@ class RoadNetworkIntegrationDialog(QDialog):
         self.add_outputs_checkbox.setChecked(False)
         self.keep_intermediates_checkbox.setChecked(False)
         self.processing_progress.setValue(0)
-        self.processing_status_label.setText("Ready. Select your inputs and run a methodology.")
+        self.processing_status_label.setText(self.T("status_ready"))
 
     def _save_settings(self):
         """Remember only the last folder as a Browse starting point, not run state."""
@@ -1535,8 +1564,8 @@ class RoadNetworkIntegrationDialog(QDialog):
                 if source == target:
                     QgsProject.instance().removeMapLayer(layer.id())
                     self._log("Released previously loaded output layer '{}' before overwriting.".format(layer.name()), "info")
-            except Exception:
-                continue
+            except (RuntimeError, ValueError, OSError):
+                self._log("A loaded project layer could not be checked for output overwrite.", "warning")
 
     def _start_run_log(self, settings, method, analysis_crs):
         """Create/append a plain-text processing log in the selected output folder."""
@@ -1687,6 +1716,11 @@ class RoadNetworkIntegrationDialog(QDialog):
     # Logging
     # ------------------------------------------------------------------
     def _log(self, message, level="info", bold=False):
-        """Append a timestamped, colour-coded message and persist active-run logs."""
-        self.log_output.appendHtml(format_log_html(message, level, bold))
+        """Append a timestamped message and persist active-run logs."""
+        stamp = datetime.now().strftime("%H:%M:%S")
+        tag = LOG_TAGS.get(level, "")
+        prefix = "[{}] ".format(stamp)
+        if tag:
+            prefix += "{}: ".format(tag)
+        self.log_output.appendPlainText(prefix + str(message))
         self._append_run_log(message, level)

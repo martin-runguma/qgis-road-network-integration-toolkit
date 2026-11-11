@@ -99,8 +99,9 @@ class ProcessingController:
             try:
                 self.log_callback(str(message))
                 return
-            except Exception:
-                pass
+            except (RuntimeError, TypeError, ValueError) as exc:
+                # e.g. the GUI object behind the callback was already deleted.
+                message = "{} (log callback failed: {})".format(message, exc)
 
         print("[Road Network Integration Toolkit] {}".format(message))
 

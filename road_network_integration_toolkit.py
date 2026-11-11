@@ -14,8 +14,8 @@ from .core.compat import MSG_CRITICAL, QAction
 class RoadNetworkIntegrationToolkit:
     """Register the plugin action and manage its non-modal main dialog."""
 
-    PLUGIN_NAME = "Road Network Integration Toolkit"
-    MENU_NAME = "&Road Network Integration Toolkit"
+    PLUGIN_NAME = "Road Network Merging and Alignment Toolkit"
+    MENU_NAME = "&Road Network Merging and Alignment Toolkit"
     ACTION_OBJECT_NAME = "roadNetworkIntegrationToolkitAction"
 
     def __init__(self, iface):
@@ -36,7 +36,7 @@ class RoadNetworkIntegrationToolkit:
             QIcon(icon_path), self.PLUGIN_NAME, self.iface.mainWindow()
         )
         self.action.setObjectName(self.ACTION_OBJECT_NAME)
-        self.action.setStatusTip("Open the Road Network Integration Toolkit")
+        self.action.setStatusTip("Open the Road Network Merging and Alignment Toolkit")
         self.action.setWhatsThis(
             "Select priority and secondary road networks, choose an analysis CRS, "
             "and validate the inputs for road-network integration."
@@ -66,8 +66,8 @@ class RoadNetworkIntegrationToolkit:
                 self.dialog.close()
                 self.dialog.deleteLater()
             except RuntimeError:
-                # The Qt object may already have been destroyed by QGIS.
-                pass
+                # The Qt object was already destroyed by QGIS; just drop our reference.
+                self.dialog = None
             finally:
                 self.dialog = None
 

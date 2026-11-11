@@ -175,10 +175,7 @@ class RoadIntegrationTask(QgsTask):
             # there, before GUI completion handlers try to reopen the output.
             output_layer = None
             if controller is not None:
-                try:
-                    controller.prepared_inputs = None
-                except Exception:
-                    pass
+                controller.prepared_inputs = None
             prepared = None
             controller = None
             result = None
