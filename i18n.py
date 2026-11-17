@@ -644,18 +644,18 @@ TEXT['ar'] = {
     'lbl_secondary': 'شبكة الطرق الثانوية:',
     'lbl_boundary': 'حدود منطقة الدراسة:',
     'hint_input': (
-        'استخدم «استعراض» لاختيار ملف متجهي أو طبقة داخل GeoPackage ‏(.gpkg) '
-        'أو File Geodatabase ‏(.gdb). تُعرض فقط الطبقات ذات نوع الهندسة '
+        'استخدم «استعراض» لاختيار ملف متجهي أو طبقة داخل GeoPackage (.gpkg) '
+        'أو File Geodatabase (.gdb). تُعرض فقط الطبقات ذات نوع الهندسة '
         'المتوقع (خطوط للطرق، ومضلعات للحدود).'),
     'btn_browse': 'استعراض…',
     'tip_path': (
         'يعرض هذا الحقل مسار مصدر البيانات. استخدم «استعراض» لاختيار ملف '
-        'أو طبقة محددة داخل GeoPackage ‏(.gpkg) أو File Geodatabase ‏(.gdb).'),
+        'أو طبقة محددة داخل GeoPackage (.gpkg) أو File Geodatabase (.gdb).'),
     'tip_browse': (
-        'استعرض للعثور على ملف متجهي أو طبقة داخل GeoPackage / File '
-        'Geodatabase'),
+        'استعرض للعثور على ملف متجهي أو طبقة داخل GeoPackage أو '
+        'File Geodatabase.'),
     'menu_vector_file': 'ملف متجهي أو GeoPackage…',
-    'menu_gdb': 'File Geodatabase ‏(.gdb)…',
+    'menu_gdb': 'File Geodatabase (.gdb)…',
 
     'grp_settings': 'إعدادات الدمج',
     'lbl_method': 'المنهجية:',

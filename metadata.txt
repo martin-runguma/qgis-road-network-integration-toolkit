@@ -24,7 +24,7 @@ about=Road Network Integration Toolkit is a QGIS plugin for integrating, alignin
     
     Compatible with QGIS 3.28 to 4.x, supporting Qt5 and Qt6 environments.
 
-version=2.0.0
+version=2.1.0
 author=Martin Runguma
 email=martin.runguma@gmail.com
 
@@ -41,7 +41,7 @@ experimental=false
 deprecated=False
 hasProcessingProvider=False
 
-changelog=2.0.0
+changelog=2.1.0
     - Redesigned the graphical user interface.
     - Introduced multilingual interface support with language selection.
     - Improved QGIS 3.28 to 4.x compatibility, including Qt5 and Qt6.

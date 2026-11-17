@@ -1,58 +1,58 @@
-# Road Network Merging and Alignment Toolkit — Website
+# Road Network Merging and Alignment Toolkit
 
-A lightweight, responsive, static website for the QGIS plugin.
+A QGIS plugin that ports the finalized Spyder/GeoPandas road-network integration workflow into PyQGIS. The established GUI layout and styling are retained. All three methodologies use a shared processing engine, and long-running preparation, overlay, snapping, and export operations run through the QGIS task manager.
 
-## Contents
+## Implemented workflow
 
-- `index.html` — complete product website
-- `assets/css/site.css` — responsive design system and page styles
-- `assets/js/site.js` — accessible mobile navigation and active-section state
-- `assets/images/plugin-icon.png` — actual icon extracted from the supplied plugin package
-- `LICENSE` — GNU GPL v3.0 license text copied from the supplied plugin package
+1. **Input preparation:** opens the selected priority-road, secondary-road, and study-area layers; reprojects them to the selected analysis CRS; repairs usable geometry; and clips the roads to the envelope of the study boundary buffered by 30 km.
+2. **Coverage classification:** creates individual flat-ended priority-road buffers and a dissolved buffer mask. Secondary-road coverage uses the legacy dominant-single-buffer rule: the largest overlap with an individual buffer is used, rather than measuring the union of overlaps. It retains the original `Missing_Class` rules, including the exact remaining ratio `0.25` being unclassified.
+3. **Methodology 1 — Direct Merge:** merges priority roads with secondary roads in `missing_1` through `missing_4` without trimming or snapping those secondary geometries. It writes the legacy three-field schema (`coverage_ratio`, `Missing_Class`, `source`).
+4. **Methodology 2 — Clip + Snap:** differences each missing class against the dissolved priority-buffer mask, densifies priority lines into snap anchors at the configured interval, snaps eligible secondary endpoints within the configured join distance, and saves cumulative class merges (base + class 1; classes 1–2; 1–3; and 1–4) to an intermediate GeoPackage.
+5. **Methodology 3 — Targeted Snap:** trims missing classes, buffers the overlap portions with square end caps, extracts local priority-road start/end/midpoint targets, applies local centroid-first and endpoint-second snapping with a global nearest-vertex fallback, leaves `missing_1` unsnapped, then merges secondary roads before the priority network. The local association is restored in the plugin rather than retaining the legacy script's missing-`buffer_id` bug that bypassed the local snapping stage.
+6. **Export:** writes the selected final result as GeoPackage, Shapefile, or File Geodatabase and verifies that QGIS can reopen the result. When requested, intermediate buffers, classified features, snap vertices, snapped roads, and diagnostic method outputs are retained under `Intermediate_Files`. The final layer can be added to the current QGIS project.
+7. **Run reporting:** a progress bar and live processing log show background task milestones. A timestamped `<output-name>_processing.log` file is written in the selected output folder and its path is shown in the completion/failure message.
 
-## Run locally
+## Compatibility and verification
 
-No build step or package installation is required. Open `index.html` in a browser, or serve this folder locally:
+- Designed for QGIS 3.28 or later.
+- Runtime processing uses PyQGIS/Qt APIs only; GeoPandas, Shapely, and the Spyder Python environment are not required in QGIS.
+- `tests/test_road_classification.py` provides QGIS-independent tests for the legacy class thresholds.
+- The main processing is executed as a QGIS background task. QgsProject access and output-layer loading remain on the GUI thread; the worker receives a copy of the project transform context.
+- The two optional checkboxes (auto-add final output and keep intermediate diagnostics) start unchecked. Closing the dialog destroys its current run state; reopening starts with a fresh form. The last output directory is remembered only as the Browse dialog starting location.
+- Static syntax checks and classification tests can run outside QGIS. A full spatial regression run still needs to be performed in the user's QGIS installation with representative road and boundary layers, because QGIS providers/GEOS and output drivers are not available in the build environment used for this rewrite.
 
-```bash
-python -m http.server 8000
-```
+## Install for local testing
 
-Then visit `http://localhost:8000`.
+1. Extract the plugin folder from the ZIP.
+2. Copy the `road_network_integration_toolkit` folder into the active QGIS profile's `python/plugins` directory (or use **Plugins > Manage and Install Plugins > Install from ZIP**). If an older copy was installed under another folder name, remove it first.
+3. Restart QGIS or reload the plugin through the Python Console.
+4. Enable **Road Network Merging and Alignment Toolkit** under **Plugins → Manage and Install Plugins → Installed**.
+5. Open the plugin from the Plugins menu or toolbar.
 
-## Deploy with GitHub Pages
+Choose a suitable projected CRS in metres (for example, the appropriate local UTM zone) for distance-based operations. Distances are converted when the selected projected CRS uses non-metre units, but a local metric CRS is recommended. GeoPackage is recommended for the final output because Shapefile limits field-name length and supports only one layer per file.
 
-1. Copy the contents of this folder into the root of the `main` branch of:
-   `https://github.com/martin-runguma/qgis-road-network-integration-toolkit`
-2. Keep the plugin source, `metadata.txt`, `help/`, tests and other project files.
-3. In GitHub, open **Settings → Pages**.
-4. Select **Deploy from a branch**, choose `main` and `/ (root)`, then save.
-5. Wait for the Pages deployment and verify the published URL.
 
-The website uses a static HTML/CSS/JS implementation to avoid a build pipeline and unnecessary dependencies. This is compatible with GitHub Pages.
+### Version 0.4.1 — GeoPackage feature-ID collision fix
 
-## Accuracy notes
+Input attributes named `fid` are now preserved under a safe `source_fid` field name during road preparation. GeoPackage reserves `fid` as its unique feature key; source datasets may restart IDs independently, and split line fragments may share a source ID. Renaming the attribute prevents duplicate-key write failures in Methodologies 2 and 3 while preserving the original source ID values. If an input already has a `source_fid` field, the renamed field receives a unique suffix.
 
-Website content was prepared against the supplied plugin ZIP. The supplied `metadata.txt` declares:
-- Plugin version `2.0.0`
-- QGIS minimum `3.28`, maximum `4.99`
-- Qt 5 and Qt 6 support
-- GNU GPL v3.0
-- GeoPackage, Shapefile and File Geodatabase output (GDB creation depends on the installed GDAL driver)
 
-The coverage method uses the largest overlap with one individual priority-road buffer, not the union of all buffer overlaps. The exact remaining ratio `0.25` is intentionally unclassified. The Maximum centroid adjustment distance setting is validated by the UI but is not currently consumed by the processing engine.
+### Version 0.5.0 — background processing and run reporting
 
-## Source-of-truth reconciliation before publication
+The three methodologies now run under `QgsTask` instead of executing the heavy geometry workflow synchronously in the GUI. The dialog includes a live progress bar and process log, a native minimise title-bar control, and a per-output processing log file. The auto-add-output and keep-intermediate checkboxes are off by default. Closing the dialog resets the active form/run state; it is recreated when opened again.
 
-There is a release-content mismatch between the supplied ZIP and the public project pages checked while preparing this package: the supplied ZIP metadata declares version `2.0.0`, while the current public GitHub README references repository metadata `0.6.0` and the official QGIS plugin listing currently shows `1.0.1` as experimental. This website intentionally follows the supplied ZIP for its feature descriptions and declared QGIS compatibility, and does not display a plugin version number. Before publishing, update/synchronise the GitHub repository and QGIS Plugin Repository listing if `2.0.0` is intended to be the public release.
 
-## Interface screenshots
+### Version 0.5.1 — Methodology 3 default
 
-The supplied ZIP did not contain a captured QGIS interface screenshot. The interface area is therefore explicitly marked as a placeholder and must be replaced with genuine screenshots from the running plugin before publication. The hero and methodology diagrams are labelled as schematic illustrations, not screenshots or measured output.
+Methodology 3 — Targeted Snap is now selected by default whenever the plugin dialog opens or resets. Users can still select Methodology 1 or 2 manually. No processing algorithms or GUI layout were changed.
 
-## Before publishing
 
-- Replace the screenshot placeholder only with authentic screenshots from the plugin.
-- Confirm the QGIS Plugin Repository listing and download target.
-- Test the published site at desktop, tablet and mobile widths.
-- Check links after deployment.
+## Compatibility
+
+* QGIS 3.28 LTR through 4.99 (Python 3.9+, PyQt5 and PyQt6). `metadata.txt` declares `supportsQt6=True`.
+* All version-specific API access (enums, `QgsField` types, `QAction`) is isolated in `core/compat.py`.
+* File Geodatabase output needs a GDAL build that can create `.gdb` (OpenFileGDB write support, GDAL 3.6+); the plugin checks this before processing starts.
+
+## Running the tests
+
+From the plugin folder: `python -m unittest discover -s tests`. The tests use fake `qgis` modules to check both API styles, so they run without QGIS; they do not replace a manual run in QGIS.
