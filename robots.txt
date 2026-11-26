@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://martin-runguma.github.io/qgis-road-network-integration-toolkit/sitemap.xml
